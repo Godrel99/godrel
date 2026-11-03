@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RESI Daily Report</title>
+    <!-- Memuat SDK Dynamsoft Barcode Reader untuk Video Packing -->
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.6.32/dist/dbr.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0d1b1e;
+            color: #e0f2f1;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* BAR NAVIGASI GLOBAL */
+        .global-nav-bar {
+            background-color: #1b2a2f;
+            border-bottom: 1px solid #2d474e;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .global-nav-bar .nav-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-nav-home {
+            background-color: #2ec4b6;
+            color: #0d1b1e;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-nav-home:hover {
+            background-color: #26a69a;
+            transform: translateY(-1px);
+        }
+
+        /* 0. HALAMAN UTAMA / DASHBOARD MENU */
+        #dashboard-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            padding: 20px;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.3rem;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-header p {
+            color: #8da9c4;
+            font-size: 1rem;
+        }
+
+        .menu-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            width: 100%;
+            max-width: 960px;
+        }
+
+        .menu-card-item {
+            background-color: #1b2a2f;
+            border: 1px solid #2d474e;
+            border-radius: 16px;
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-card-item:hover {
+            transform: translateY(-6px);
+            border-color: #2ec4b6;
+            box-shadow: 0 12px 30px rgba(46, 196, 182, 0.25);
+        }
+
+        .menu-card-item svg {
+            width: 56px;
+            height: 56px;
+            fill: #2ec4b6;
+        }
+
+        .menu-card-item h3 {
+            font-size: 1.25rem;
+            color: #ffffff;
+        }
+
+        .menu-card-item p {
+            font-size: 0.9rem;
+            color: #8da9c4;
+            line-height: 1.4;
+        }
+
+        /* CONTAINER APLIKASI */
+        .app-view-wrapper {
+            display: none;
+            width: 100%;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* 1. STYLE: RESI PRINT */
+        .print-app-scope {
+            background-color: #0b132b;
+            color: #e0e6ed;
+            min-height: calc(100vh - 60px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .print-app-scope .app-container { display: flex; flex-direction: row; gap: 24px; width: 100%; max-width: 1200px; height: 85vh; }
+        .print-app-scope .panel-card { background-color: #1c2541; border-radius: 16px; padding: 24px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4); border: 1px solid #3a506b; display: flex; flex-direction: column; }
+        .print-app-scope .sidebar-panel { flex: 0 0 340px; }
+        .print-app-scope .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #3a506b; }
+        .print-app-scope .panel-title { font-size: 1.15rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
+        .print-app-scope .badge-count { background-color: #48cae4; color: #0b132b; font-size: 0.9rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; }
+        .print-app-scope .table-wrapper { flex: 1; overflow-y: auto; border: 1px solid #3a506b; border-radius: 8px; background-color: #0b132b; }
+        .print-app-scope .table-wrapper::-webkit-scrollbar { width: 6px; }
+        .print-app-scope .table-wrapper::-webkit-scrollbar-thumb { background: #3a506b; border-radius: 4px; }
+        .print-app-scope .scan-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; text-align: left; }
+        .print-app-scope .scan-table th, .print-app-scope .scan-table td { border: 1px solid #1c2541; padding: 12px 14px; }
+        .print-app-scope .scan-table th { position: sticky; top: 0; background-color: #1c2541; color: #48cae4; font-weight: 700; z-index: 2; }
+        .print-app-scope .scan-table td { color: #d1d5db; word-break: break-all; }
+        .print-app-scope .scan-table tr:nth-child(even) { background-color: #111b36; }
+        .print-app-scope .scan-table tr:hover { background-color: #233256; }
+        .print-app-scope .col-no { width: 55px; text-align: center; color: #8d99ae !important; font-weight: 700; }
+        .print-app-scope .empty-state { padding: 40px 20px; text-align: center; color: #6c757d; font-size: 0.95rem; }
+        .print-app-scope .main-panel { flex: 1; justify-content: space-between; align-items: center; text-align: center; }
+        .print-app-scope .app-title-group h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 6px; }
+        .print-app-scope .app-title-group p { color: #8d99ae; font-size: 0.95rem; }
+        .print-app-scope .scanner-box { width: 100%; max-width: 520px; background: #0b132b; border: 2px dashed #48cae4; border-radius: 16px; padding: 35px 25px; margin: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 16px; transition: all 0.3s ease; position: relative; }
+        .print-app-scope .scanner-box.active-pulse { border-style: solid; border-color: #00b4d8; box-shadow: 0 0 25px rgba(72, 202, 228, 0.25); }
+        .print-app-scope .scanner-icon { width: 64px; height: 64px; fill: #48cae4; margin-bottom: 5px; }
+        .print-app-scope .scan-input { width: 100%; padding: 16px; font-size: 1.2rem; font-weight: 700; text-align: center; color: #ffffff; background-color: #1c2541; border: 2px solid #3a506b; border-radius: 10px; outline: none; letter-spacing: 1px; transition: border-color 0.2s; }
+        .print-app-scope .scan-input:focus { border-color: #48cae4; box-shadow: 0 0 10px rgba(72, 202, 228, 0.3); }
+        .print-app-scope .scan-status { font-size: 1rem; font-weight: 600; padding: 8px 16px; border-radius: 8px; background: #1c2541; color: #ffd166; border: 1px solid #3a506b; width: 100%; }
+        .print-app-scope .scan-status.success { color: #06d6a0; border-color: #06d6a0; background: rgba(6, 214, 160, 0.1); }
+        .print-app-scope .scan-status.duplicate { color: #ff6b6b; border-color: #ff6b6b; background: rgba(255, 107, 107, 0.1); }
+        .print-app-scope .instructions { background-color: #111b36; border: 1px solid #3a506b; border-radius: 10px; padding: 14px 20px; font-size: 0.88rem; color: #a0aec0; width: 100%; display: flex; justify-content: space-around; }
+        .print-app-scope .instructions span { display: flex; align-items: center; gap: 6px; }
+        .print-app-scope .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 19, 43, 0.85); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s ease; }
+        .print-app-scope .modal-overlay.show { opacity: 1; visibility: visible; }
+        .print-app-scope .modal-card { background: #1c2541; border: 1px solid #ff6b6b; border-radius: 14px; padding: 28px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .print-app-scope .modal-card h3 { color: #ff6b6b; margin-bottom: 10px; font-size: 1.3rem; }
+        .print-app-scope .modal-card p { color: #d1d5db; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; }
+        .print-app-scope .modal-card button { background: #ff6b6b; color: #ffffff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; }
+
+        /* 2. STYLE: RESI VIDEO PACKING */
+        .video-app-scope {
+            background-color: #121212;
+            color: #ffffff;
+            min-height: calc(100vh - 60px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            width: 100%;
+        }
+
+        .video-app-scope .app-layout { display: flex; flex-direction: row; gap: 20px; width: 100%; max-width: 98vw; align-items: stretch; }
+        .video-app-scope .panel-card { background-color: #1e1e1e; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); border: 1px solid #333; display: flex; flex-direction: column; position: relative; }
+        .video-app-scope .sidebar-panel { flex: 0 0 320px; min-width: 280px; }
+        .video-app-scope .panel-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; color: #ffffff; display: flex; align-items: center; justify-content: space-between; }
+        .video-app-scope .badge-count { background-color: #2e7d32; color: #ffffff; font-size: 0.85rem; font-weight: bold; padding: 3px 10px; border-radius: 12px; }
+        .video-app-scope .table-container { flex: 1; overflow-y: auto; max-height: 78vh; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; background-color: #141414; position: relative; }
+        .video-app-scope .table-container::-webkit-scrollbar { width: 8px; }
+        .video-app-scope .table-container::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        .video-app-scope .record-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; }
+        .video-app-scope .record-table th, .video-app-scope .record-table td { border: 1px solid rgba(255, 255, 255, 0.25); padding: 10px 12px; }
+        .video-app-scope .record-table th { position: sticky; top: 0; background-color: #2a2a2a; color: #ffffff; font-weight: 600; z-index: 2; }
+        .video-app-scope .record-table td { word-break: break-all; color: #eeeeee; }
+        .video-app-scope .record-table tr:nth-child(even) { background-color: #1a1a1a; }
+        .video-app-scope .record-table tr:hover { background-color: #2c2c2c; }
+        .video-app-scope .col-no { width: 50px; text-align: center; color: #aaa !important; font-weight: 600; }
+        .video-app-scope .highlight-row td { background-color: rgba(255, 152, 0, 0.22) !important; color: #ffb74d !important; font-weight: 600; }
+        .video-app-scope .pointing-arrow { position: fixed; z-index: 10000; font-size: 3.5rem; color: #ff9800; font-weight: bold; transform: rotate(180deg) scaleX(1.6); animation: bounceHorizontal 0.8s infinite ease-in-out; pointer-events: none; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.9)); }
+        @keyframes bounceHorizontal { 0%, 100% { transform: rotate(180deg) scaleX(1.6) translateX(0); } 50% { transform: rotate(180deg) scaleX(1.6) translateX(15px); } }
+        .video-app-scope .empty-state { padding: 30px 15px; text-align: center; color: #888; font-size: 0.9rem; }
+        .video-app-scope .main-panel { flex: 1; align-items: center; justify-content: space-between; padding: 18px 24px; }
+        .video-app-scope h2 { margin-bottom: 12px; font-size: 2.8rem; text-align: center; color: #ffffff; }
+        .video-app-scope .container { position: relative; width: 100%; background: #000; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; flex: 1; max-height: 72vh; }
+        .video-app-scope video, .video-app-scope canvas { width: 100%; height: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; transition: transform 0.2s ease; }
+        .video-app-scope #recordCanvas { display: none; }
+        .video-app-scope #overlayCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .video-app-scope .container.is-recording video, .video-app-scope .container.is-recording canvas { aspect-ratio: auto; object-fit: contain; max-height: 72vh; }
+        .video-app-scope .status-badge { position: absolute; top: 15px; left: 15px; background: rgba(0, 0, 0, 0.8); padding: 8px 14px; border-radius: 6px; font-size: 0.95rem; font-weight: 600; z-index: 10; backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .video-app-scope .status-scanning { color: #ffeb3b; }
+        .video-app-scope .status-recording { color: #ff4d4d; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.4; } }
+        .video-app-scope .scanner-mask { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+        .video-app-scope .scanner-window { position: relative; width: 75%; height: 50%; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65); }
+        .video-app-scope .corner { position: absolute; width: 24px; height: 24px; border-color: #ffffff; border-style: solid; border-width: 0; }
+        .video-app-scope .corner-tl { top: 0; left: 0; border-top-width: 4px; border-left-width: 4px; }
+        .video-app-scope .corner-tr { top: 0; right: 0; border-top-width: 4px; border-right-width: 4px; }
+        .video-app-scope .corner-bl { bottom: 0; left: 0; border-bottom-width: 4px; border-left-width: 4px; }
+        .video-app-scope .corner-br { bottom: 0; right: 0; border-bottom-width: 4px; border-right-width: 4px; }
+        .video-app-scope .laser-line { position: absolute; left: 0; width: 100%; height: 2px; background-color: #ff3333; box-shadow: 0 0 8px #ff0000; animation: scanLaser 3s infinite ease-in-out; }
+        @keyframes scanLaser { 0% { top: 0%; } 50% { top: 95%; } 100% { top: 0%; } }
+        .video-app-scope .controls { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; width: 100%; }
+        .video-app-scope button { padding: 10px 18px; font-size: 0.9rem; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background-color: #2c2c2c; color: #ffffff; border: 1px solid #444; transition: all 0.2s ease; }
+        .video-app-scope button:hover { background-color: #3d3d3d; border-color: #666; }
+        .video-app-scope button.active { background-color: #d32f2f; border-color: #d32f2f; }
+        .video-app-scope .info { margin-top: 10px; font-size: 0.9rem; color: #aaa; text-align: center; }
+        .video-app-scope .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        .video-app-scope .modal-overlay.show { opacity: 1; visibility: visible; }
+        .video-app-scope .modal-box { background-color: #1e1e1e; color: #ffffff; width: 90%; max-width: 400px; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.7); border: 1px solid #333; transform: scale(0.9); transition: transform 0.3s ease; }
+        .video-app-scope .modal-overlay.show .modal-box { transform: scale(1); }
+        .video-app-scope .modal-box h3 { color: #4CAF50; margin-bottom: 10px; }
+        .video-app-scope .modal-box p { font-size: 0.95rem; color: #ccc; margin-bottom: 20px; line-height: 1.5; word-break: break-all; }
+        .video-app-scope .modal-box button { background-color: #4CAF50; color: white; width: 100%; padding: 12px; border: none; font-size: 0.95rem; }
+        .video-app-scope .modal-box button:hover { background-color: #43a047; }
+
+        /* 3. STYLE: RESI PICKUP KURIR */
+        .pickup-app-scope {
+            background-color: #0d1b1e;
+            color: #e0f2f1;
+            min-height: calc(100vh - 60px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .pickup-app-scope .app-container { display: flex; flex-direction: row; gap: 24px; width: 100%; max-width: 1200px; height: 85vh; }
+        .pickup-app-scope .panel-card { background-color: #1b2a2f; border-radius: 16px; padding: 24px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5); border: 1px solid #2d474e; display: flex; flex-direction: column; }
+        .pickup-app-scope .main-panel { flex: 1; justify-content: space-between; align-items: center; text-align: center; }
+        .pickup-app-scope .sidebar-panel { flex: 0 0 340px; }
+        .pickup-app-scope .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #2d474e; }
+        .pickup-app-scope .panel-title { font-size: 1.15rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
+        .pickup-app-scope .badge-count { background-color: #2ec4b6; color: #0d1b1e; font-size: 0.9rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; }
+        .pickup-app-scope .table-wrapper { flex: 1; overflow-y: auto; border: 1px solid #2d474e; border-radius: 8px; background-color: #0d1b1e; }
+        .pickup-app-scope .table-wrapper::-webkit-scrollbar { width: 6px; }
+        .pickup-app-scope .table-wrapper::-webkit-scrollbar-thumb { background: #2d474e; border-radius: 4px; }
+        .pickup-app-scope .scan-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; text-align: left; }
+        .pickup-app-scope .scan-table th, .pickup-app-scope .scan-table td { border: 1px solid #1b2a2f; padding: 12px 14px; }
+        .pickup-app-scope .scan-table th { position: sticky; top: 0; background-color: #1b2a2f; color: #2ec4b6; font-weight: 700; z-index: 2; }
+        .pickup-app-scope .scan-table td { color: #d8f3dc; word-break: break-all; }
+        .pickup-app-scope .scan-table tr:nth-child(even) { background-color: #122226; }
+        .pickup-app-scope .scan-table tr:hover { background-color: #22383f; }
+        .pickup-app-scope .col-no { width: 55px; text-align: center; color: #8da9c4 !important; font-weight: 700; }
+        .pickup-app-scope .empty-state { padding: 40px 20px; text-align: center; color: #63767c; font-size: 0.95rem; }
+        .pickup-app-scope .app-title-group h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 6px; }
+        .pickup-app-scope .app-title-group p { color: #8da9c4; font-size: 0.95rem; }
+        .pickup-app-scope .scanner-box { width: 100%; max-width: 520px; background: #0d1b1e; border: 2px dashed #2ec4b6; border-radius: 16px; padding: 35px 25px; margin: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 16px; transition: all 0.3s ease; position: relative; }
+        .pickup-app-scope .scanner-box.active-pulse { border-style: solid; border-color: #2ec4b6; box-shadow: 0 0 25px rgba(46, 196, 182, 0.25); }
+        .pickup-app-scope .scanner-icon { width: 64px; height: 64px; fill: #2ec4b6; margin-bottom: 5px; }
+        .pickup-app-scope .scan-input { width: 100%; padding: 16px; font-size: 1.2rem; font-weight: 700; text-align: center; color: #ffffff; background-color: #1b2a2f; border: 2px solid #2d474e; border-radius: 10px; outline: none; letter-spacing: 1px; transition: border-color 0.2s; }
+        .pickup-app-scope .scan-input:focus { border-color: #2ec4b6; box-shadow: 0 0 10px rgba(46, 196, 182, 0.3); }
+        .pickup-app-scope .scan-status { font-size: 1rem; font-weight: 600; padding: 8px 16px; border-radius: 8px; background: #1b2a2f; color: #ffb703; border: 1px solid #2d474e; width: 100%; }
+        .pickup-app-scope .scan-status.success { color: #2ec4b6; border-color: #2ec4b6; background: rgba(46, 196, 182, 0.1); }
+        .pickup-app-scope .scan-status.duplicate { color: #ff5964; border-color: #ff5964; background: rgba(255, 89, 100, 0.1); }
+        .pickup-app-scope .instructions { background-color: #122226; border: 1px solid #2d474e; border-radius: 10px; padding: 14px 20px; font-size: 0.88rem; color: #94a3b8; width: 100%; display: flex; justify-content: space-around; }
+        .pickup-app-scope .instructions span { display: flex; align-items: center; gap: 6px; }
+        .pickup-app-scope .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 27, 30, 0.85); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s ease; }
+        .pickup-app-scope .modal-overlay.show { opacity: 1; visibility: visible; }
+        .pickup-app-scope .modal-card { background: #1b2a2f; border: 1px solid #ff5964; border-radius: 14px; padding: 28px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .pickup-app-scope .modal-card h3 { color: #ff5964; margin-bottom: 10px; font-size: 1.3rem; }
+        .pickup-app-scope .modal-card p { color: #d8f3dc; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; }
+        .pickup-app-scope .modal-card button { background: #ff5964; color: #ffffff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; }
+
+        @media (max-width: 850px) {
+            .print-app-scope .app-container, .pickup-app-scope .app-container { flex-direction: column; height: auto; }
+            .print-app-scope .sidebar-panel, .pickup-app-scope .sidebar-panel { width: 100%; flex: none; height: 350px; }
+            .video-app-scope .app-layout { flex-direction: column-reverse; max-width: 100%; }
+            .video-app-scope .sidebar-panel { flex: 1; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- GLOBAL TOP NAV BAR -->
+    <div class="global-nav-bar">
+        <div class="nav-title" id="globalNavTitle">RESI Daily Report</div>
+        <button id="btnHome" class="btn-nav-home" onclick="switchApp('dashboard')">↩ Halaman Utama</button>
+    </div>
+
+    <!-- 0. HALAMAN UTAMA / DASHBOARD MENU -->
+    <div id="dashboard-view">
+        <div class="dashboard-header">
+            <h1>Pilih Aplikasi Resi</h1>
+            <p>Silakan pilih alur pengerjaan resi yang ingin dilakukan</p>
+        </div>
+        <div class="menu-grid-container">
+            <div class="menu-card-item" onclick="switchApp('print')">
+                <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-4 11H9v-5h6v5zm4-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-2-9H7v4h10V3z"/></svg>
+                <h3>Resi Print</h3>
+                <p>Input RESI yang telah diprint</p>
+            </div>
+            <div class="menu-card-item" onclick="switchApp('video')">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                <h3>Resi Video Packing</h3>
+                <p>Rekam video packing</p>
+            </div>
+            <div class="menu-card-item" onclick="switchApp('pickup')">
+                <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                <h3>Resi Pickup Kurir</h3>
+                <p>Input RESI yang telah dipickup kurir</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. MODUL APP: RESI PRINT -->
+    <div id="print-view" class="app-view-wrapper print-app-scope">
+        <div id="duplicateModalPrint" class="modal-overlay">
+            <div class="modal-card">
+                <h3>Resi Terdeteksi Duplikat</h3>
+                <p id="duplicateTextPrint">Resi ini sudah dimasukkan sebelumnya!</p>
+                <button id="btnCloseDuplicatePrint">OK</button>
+            </div>
+        </div>
+        <div class="app-container">
+            <div class="panel-card sidebar-panel">
+                <div class="panel-header">
+                    <span class="panel-title">Resi diprint (Hari Ini)</span>
+                    <span id="scanCounterPrint" class="badge-count">0</span>
+                </div>
+                <div class="table-wrapper">
+                    <table class="scan-table">
+                        <thead>
+                            <tr>
+                                <th class="col-no">No</th>
+                                <th>Kode Resi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBodyPrint"></tbody>
+                    </table>
+                    <div id="emptyStatePrint" class="empty-state">Belum ada resi di-scan hari ini</div>
+                </div>
+            </div>
+            <div class="panel-card main-panel">
+                <div class="app-title-group">
+                    <h1>Scanner Print Resi</h1>
+                    <p>Input RESI yg telah diprint</p>
+                </div>
+                <div class="scanner-box active-pulse" id="scannerBoxPrint">
+                    <svg class="scanner-icon" viewBox="0 0 24 24">
+                        <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-4 11H9v-5h6v5zm4-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-2-9H7v4h10V3z"/>
+                    </svg>
+                    <input type="text" id="barcodeInputPrint" class="scan-input" placeholder="Scan atau input manual kode resi di sini..." autocomplete="off" />
+                    <div id="statusMessagePrint" class="scan-status">Siap Memindai...</div>
+                </div>
+                <div class="instructions">
+                    <span>⚡ Auto-Focus Aktif</span>
+                    <span>📦 Tembak Barcode Langsung</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MODUL APP: RESI VIDEO PACKING -->
+    <div id="video-view" class="app-view-wrapper video-app-scope">
+        <div id="pointingArrowVideo" class="pointing-arrow" style="display: none;">➔</div>
+        <div id="modalOverlayVideo" class="modal-overlay">
+            <div class="modal-box">
+                <h3>Rekaman Selesai!</h3>
+                <p id="modalMessageVideo">Video berhasil didownload otomatis</p>
+                <button id="btnCloseModalVideo">Tutup</button>
+            </div>
+        </div>
+        <div id="duplicateModalOverlayVideo" class="modal-overlay">
+            <div class="modal-box" style="border-color: #ff9800;">
+                <h3 style="color: #ff9800;">Perhatian</h3>
+                <p style="line-height: 1.6;">Resi telah berhasil direkam sebelumnya.<br>Bisa dicek di list<br>Silakan scan resi berikutnya</p>
+                <button id="btnCloseDuplicateVideo" style="background-color: #ff9800;">Oke</button>
+            </div>
+        </div>
+        <div class="app-layout">
+            <div class="panel-card sidebar-panel">
+                <div class="panel-title">
+                    <span>Telah Direkam (Hari Ini)</span>
+                    <span id="recordCountVideo" class="badge-count">0</span>
+                </div>
+                <div class="table-container">
+                    <table class="record-table">
+                        <thead>
+                            <tr>
+                                <th class="col-no">No</th>
+                                <th>Barcode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBodyVideo"></tbody>
+                    </table>
+                    <div id="emptyStateVideo" class="empty-state">Belum ada resi direkam hari ini</div>
+                </div>
+            </div>
+            <div class="panel-card main-panel">
+                <h2>Resi Video Packing</h2>
+                <div class="container" id="mainContainerVideo">
+                    <div id="statusBadgeVideo" class="status-badge status-scanning">Inisialisasi Pemindai...</div>
+                    <div id="scannerMaskVideo" class="scanner-mask">
+                        <div class="scanner-window">
+                            <div class="corner corner-tl"></div>
+                            <div class="corner corner-tr"></div>
+                            <div class="corner corner-bl"></div>
+                            <div class="corner corner-br"></div>
+                            <div class="laser-line"></div>
+                        </div>
+                    </div>
+                    <video id="videoElement" autoplay playsinline muted></video>
+                    <canvas id="overlayCanvas"></canvas>
+                    <canvas id="recordCanvas"></canvas>
+                </div>
+                <div class="controls">
+                    <button id="btnSwitchCam" style="display:none;">Switch Kamera</button>
+                    <button id="btnFlash" style="display:none;">Flash: OFF</button>
+                    <button id="btnMirrorLR" class="active">Mirror Kanan-Kiri: ON</button>
+                    <button id="btnMirrorUD">Mirror Atas-Bawah: OFF</button>
+                    <button id="btnManualStop" style="display:none; background-color: #d32f2f; border-color: #d32f2f;">Stop Rekam</button>
+                </div>
+                <div class="info">
+                    <div id="infoScanning">Pindai barcode resi di dalam kotak untuk mulai merekam otomatis.</div>
+                    <div id="infoRecording" style="display: none;">Tekan <b>Spasi</b> atau tombol manual untuk berhenti.</div>
+                </div>
+            </div>
+        </div>
+        <a id="downloadLinkVideo" style="display:none;"></a>
+    </div>
+
+    <!-- 3. MODUL APP: RESI PICKUP KURIR -->
+    <div id="pickup-view" class="app-view-wrapper pickup-app-scope">
+        <div id="duplicateModalPickup" class="modal-overlay">
+            <div class="modal-card">
+                <h3>Resi Terdeteksi Duplikat</h3>
+                <p id="duplicateTextPickup">Resi ini sudah dimasukkan sebelumnya!</p>
+                <button id="btnCloseDuplicatePickup">OK</button>
+            </div>
+        </div>
+        <div class="app-container">
+            <div class="panel-card main-panel">
+                <div class="app-title-group">
+                    <h1>Resi Pickup Kurir</h1>
+                    <p>Input RESI yang telah dipickup kurir</p>
+                </div>
+                <div class="scanner-box active-pulse" id="scannerBoxPickup">
+                    <svg class="scanner-icon" viewBox="0 0 24 24">
+                        <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                    </svg>
+                    <input type="text" id="barcodeInputPickup" class="scan-input" placeholder="Scan atau input manual kode resi di sini..." autocomplete="off" />
+                    <div id="statusMessagePickup" class="scan-status">Siap Memindai Pickup...</div>
+                </div>
+                <div class="instructions">
+                    <span>⚡ Auto-Focus Aktif</span>
+                    <span>📦 Tembak Barcode Langsung</span>
+                </div>
+            </div>
+            <div class="panel-card sidebar-panel">
+                <div class="panel-header">
+                    <span class="panel-title">Resi dipickup (Hari Ini)</span>
+                    <span id="scanCounterPickup" class="badge-count">0</span>
+                </div>
+                <div class="table-wrapper">
+                    <table class="scan-table">
+                        <thead>
+                            <tr>
+                                <th class="col-no">No</th>
+                                <th>Kode Resi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBodyPickup"></tbody>
+                    </table>
+                    <div id="emptyStatePickup" class="empty-state">Belum ada resi dipickup hari ini</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxvgi8zUkxdByFB78J6gKaTE0mdHlUtH8j747cBJdwIMQCEGJEB_tbQAKRZIFVd5x7s/exec";
+
+    let currentActiveApp = 'dashboard';
+
+    // MEMORI LOKAL LENGKAP & MEMORI LIST HARI INI
+    let masterRecords = []; // { code, date, appType }
+    let todayListPrint = [];
+    let todayListVideo = [];
+    let todayListPickup = [];
+
+    // OJEK ANTREAN OFFLINE (OFFLINE QUEUE)
+    let offlineQueue = JSON.parse(localStorage.getItem('resi_offline_queue') || '[]');
+
+    function cleanCode(str) {
+        return String(str || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    }
+
+    function getTodayString() {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function parseDateString(timeStr) {
+        if (!timeStr) return getTodayString();
+        const monthMap = {
+            "Januari": "01", "Februari": "02", "Maret": "03", "April": "04", "Mei": "05", "Juni": "06",
+            "Juli": "07", "Agustus": "08", "September": "09", "Oktober": "10", "November": "11", "Desember": "12"
+        };
+        const parts = timeStr.trim().split(" ");
+        if (parts.length >= 3) {
+            const day = String(parts[0]).padStart(2, '0');
+            const monthStr = parts[1];
+            const year = parts[2];
+            if (monthMap[monthStr]) {
+                return `${year}-${monthMap[monthStr]}-${day}`;
+            }
+        }
+        return getTodayString();
+    }
+
+    // UTILS STORAGE LOCAL
+    function saveMasterToStorage() {
+        localStorage.setItem('resi_master_records', JSON.stringify(masterRecords));
+    }
+
+    function loadMasterFromStorage() {
+        const local = localStorage.getItem('resi_master_records');
+        if (local) {
+            try { masterRecords = JSON.parse(local); } catch(e) { masterRecords = []; }
+        }
+    }
+
+    function saveOfflineQueue() {
+        localStorage.setItem('resi_offline_queue', JSON.stringify(offlineQueue));
+    }
+
+    // PENGIRIMAN DATA KE SERVER DENGAN LOGIKA OFFLINE QUEUE
+    function sendPayloadToSheets(action, resiCode) {
+        const payloadObj = { action: action, resi: resiCode };
+        const payloadStr = JSON.stringify(payloadObj);
+
+        if (!navigator.onLine) {
+            offlineQueue.push(payloadObj);
+            saveOfflineQueue();
+            return;
+        }
+
+        if (navigator.sendBeacon) {
+            const blob = new Blob([payloadStr], { type: 'text/plain' });
+            const success = navigator.sendBeacon(WEB_APP_URL, blob);
+            if (!success) {
+                offlineQueue.push(payloadObj);
+                saveOfflineQueue();
+            }
+        } else {
+            fetch(WEB_APP_URL, {
+                method: "POST", mode: "no-cors",
+                headers: { "Content-Type": "text/plain" }, body: payloadStr
+            }).catch(() => {
+                offlineQueue.push(payloadObj);
+                saveOfflineQueue();
+            });
+        }
+    }
+
+    // AUTO-SYNC ANTREAN OFFLINE KETIKA KONEKSI KEMBALI ONLINE
+    window.addEventListener('online', syncOfflineQueue);
+    function syncOfflineQueue() {
+        if (offlineQueue.length === 0) return;
+        const queueToProcess = [...offlineQueue];
+        offlineQueue = [];
+        saveOfflineQueue();
+
+        queueToProcess.forEach(item => {
+            sendPayloadToSheets(item.action, item.resi);
+        });
+    }
+
+    // FULL REFRESH SYNC DARI GSHEET
+    async function syncDataFromGSheet() {
+        if (!navigator.onLine) {
+            renderTodayListsFromMaster();
+            return;
+        }
+
+        try {
+            const response = await fetch(WEB_APP_URL);
+            const json = await response.json();
+
+            if (json.status === "SUCCESS" && Array.isArray(json.data)) {
+                // TIMPA TOTAL MEMORI LOKAL DENGAN DATA VALID DARI SHEET
+                masterRecords = [];
+
+                json.data.forEach(item => {
+                    const resiA = item.colA ? item.colA.trim() : "";
+                    const resiB = item.colB ? item.colB.trim() : "";
+                    const resiC = item.colC ? item.colC.trim() : "";
+
+                    const dateA = parseDateString(item.timeA);
+                    const dateB = parseDateString(item.timeB);
+                    const dateC = parseDateString(item.timeC);
+
+                    // 1. Dapatkan Resi Print
+                    if (resiA !== "") {
+                        masterRecords.push({ code: resiA, date: dateA, appType: 'print' });
+                    }
+
+                    // 2. Dapatkan Resi Video Packing
+                    if (resiB !== "") {
+                        let actualCodeB = resiB === "Sudah" ? resiA : resiB;
+                        if (actualCodeB !== "") {
+                            masterRecords.push({ code: actualCodeB, date: dateB, appType: 'video' });
+                        }
+                    }
+
+                    // 3. Dapatkan Resi Pickup Kurir
+                    if (resiC !== "") {
+                        let actualCodeC = resiC === "Sudah" ? resiA : resiC;
+                        if (actualCodeC !== "") {
+                            masterRecords.push({ code: actualCodeC, date: dateC, appType: 'pickup' });
+                        }
+                    }
+                });
+
+                saveMasterToStorage();
+            }
+        } catch (err) {
+            console.warn("Gagal terhubung ke GSheet, menggunakan data local cache.", err);
+        }
+
+        renderTodayListsFromMaster();
+    }
+
+    // RENDER TAMPILAN RESI KHUSUS HARI INI
+    function renderTodayListsFromMaster() {
+        const todayStr = getTodayString();
+        
+        todayListPrint = [];
+        todayListVideo = [];
+        todayListPickup = [];
+
+        tableBodyPrint.innerHTML = "";
+        tableBodyVideo.innerHTML = "";
+        tableBodyPickup.innerHTML = "";
+
+        masterRecords.forEach(item => {
+            if (item.date === todayStr) {
+                if (item.appType === 'print') {
+                    todayListPrint.push(item.code);
+                    addResiToTableDOM(tableBodyPrint, emptyStatePrint, scanCounterPrint, todayListPrint.length, item.code, '#print-view .table-wrapper');
+                } else if (item.appType === 'video') {
+                    todayListVideo.push(item.code);
+                    addResiToTableDOM(tableBodyVideo, emptyStateVideo, recordCountVideo, todayListVideo.length, item.code, '#video-view .table-container');
+                } else if (item.appType === 'pickup') {
+                    todayListPickup.push(item.code);
+                    addResiToTableDOM(tableBodyPickup, emptyStatePickup, scanCounterPickup, todayListPickup.length, item.code, '#pickup-view .table-wrapper');
+                }
+            }
+        });
+    }
+
+    function addResiToTableDOM(tbody, emptyEl, countEl, index, codeVal, scrollWrapperSelector) {
+        if (emptyEl) emptyEl.style.display = 'none';
+        const tr = document.createElement('tr');
+        const tdNo = document.createElement('td');
+        tdNo.className = 'col-no';
+        tdNo.innerText = index;
+        const tdCode = document.createElement('td');
+        tdCode.innerText = codeVal;
+        tr.appendChild(tdNo);
+        tr.appendChild(tdCode);
+        tbody.appendChild(tr);
+
+        if (countEl) countEl.innerText = index;
+        const wrapper = document.querySelector(scrollWrapperSelector);
+        if (wrapper) wrapper.scrollTop = wrapper.scrollHeight;
+    }
+
+    // CEK DUPLIKAT TERHADAP SELURUH MASTER RECORD (LINTAS HARI)
+    function isDuplicateMaster(resiVal, appType) {
+        const targetClean = cleanCode(resiVal);
+        return masterRecords.some(r => r.appType === appType && cleanCode(r.code) === targetClean);
+    }
+
+    // NAVIGASI ROUTER HALAMAN
+    function switchApp(appName) {
+        currentActiveApp = appName;
+        document.getElementById('dashboard-view').style.display = 'none';
+        document.getElementById('print-view').style.display = 'none';
+        document.getElementById('video-view').style.display = 'none';
+        document.getElementById('pickup-view').style.display = 'none';
+
+        const btnHome = document.getElementById('btnHome');
+        const navTitle = document.getElementById('globalNavTitle');
+
+        if (appName === 'dashboard') {
+            document.getElementById('dashboard-view').style.display = 'flex';
+            btnHome.style.display = 'none';
+            navTitle.innerText = "RESI Daily Report";
+            stopVideoCameraModule();
+        } else if (appName === 'print') {
+            document.getElementById('print-view').style.display = 'flex';
+            btnHome.style.display = 'block';
+            navTitle.innerText = "Resi Print";
+            stopVideoCameraModule();
+            setTimeout(keepFocusPrint, 100);
+        } else if (appName === 'video') {
+            document.getElementById('video-view').style.display = 'flex';
+            btnHome.style.display = 'block';
+            navTitle.innerText = "Resi Video Packing";
+            startVideoModule();
+        } else if (appName === 'pickup') {
+            document.getElementById('pickup-view').style.display = 'flex';
+            btnHome.style.display = 'block';
+            navTitle.innerText = "Resi Pickup Kurir";
+            stopVideoCameraModule();
+            setTimeout(keepFocusPickup, 100);
+        }
+    }
+
+    // =========================================================
+    // MODUL 1: RESI PRINT
+    // =========================================================
+    const barcodeInputPrint = document.getElementById('barcodeInputPrint');
+    const tableBodyPrint = document.getElementById('tableBodyPrint');
+    const emptyStatePrint = document.getElementById('emptyStatePrint');
+    const scanCounterPrint = document.getElementById('scanCounterPrint');
+    const statusMessagePrint = document.getElementById('statusMessagePrint');
+    const duplicateModalPrint = document.getElementById('duplicateModalPrint');
+    const duplicateTextPrint = document.getElementById('duplicateTextPrint');
+    const btnCloseDuplicatePrint = document.getElementById('btnCloseDuplicatePrint');
+
+    let isModalOpenPrint = false;
+
+    function keepFocusPrint() {
+        if (currentActiveApp === 'print' && !isModalOpenPrint) {
+            barcodeInputPrint.focus();
+        }
+    }
+
+    document.addEventListener('click', keepFocusPrint);
+
+    function showDuplicateAlertPrint(resiCode) {
+        isModalOpenPrint = true;
+        duplicateTextPrint.innerHTML = `Resi <b>${resiCode}</b> sudah dimasukkan sebelumnya!`;
+        duplicateModalPrint.classList.add('show');
+        btnCloseDuplicatePrint.focus();
+    }
+
+    function closeDuplicateAlertPrint() {
+        duplicateModalPrint.classList.remove('show');
+        isModalOpenPrint = false;
+        barcodeInputPrint.value = '';
+        setTimeout(keepFocusPrint, 50);
+    }
+
+    btnCloseDuplicatePrint.addEventListener('click', closeDuplicateAlertPrint);
+
+    document.addEventListener('keydown', function(e) {
+        if (currentActiveApp === 'print' && isModalOpenPrint) {
+            if (e.key === 'Escape' || e.code === 'Escape') {
+                e.preventDefault();
+                closeDuplicateAlertPrint();
+            }
+        }
+    });
+
+    barcodeInputPrint.addEventListener('keydown', function(e) {
+        if (currentActiveApp !== 'print' || isModalOpenPrint) return;
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const resiVal = this.value.trim();
+            if (!resiVal) return;
+
+            if (isDuplicateMaster(resiVal, 'print')) {
+                statusMessagePrint.className = "scan-status duplicate";
+                statusMessagePrint.innerText = `DUPLIKAT: ${resiVal}`;
+                showDuplicateAlertPrint(resiVal);
+            } else {
+                // Tambahkan ke Master Records lokal
+                const todayStr = getTodayString();
+                masterRecords.push({ code: resiVal, date: todayStr, appType: 'print' });
+                saveMasterToStorage();
+
+                todayListPrint.push(resiVal);
+                addResiToTableDOM(tableBodyPrint, emptyStatePrint, scanCounterPrint, todayListPrint.length, resiVal, '#print-view .table-wrapper');
+
+                sendPayloadToSheets("print_resi", resiVal);
+
+                statusMessagePrint.className = "scan-status success";
+                statusMessagePrint.innerText = `BERHASIL: ${resiVal}`;
+                this.value = '';
+            }
+        }
+    });
+
+    // =========================================================
+    // MODUL 2: RESI VIDEO PACKING
+    // =========================================================
+    const video = document.getElementById('videoElement');
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    const overlayCtx = overlayCanvas.getContext('2d');
+    const recordCanvas = document.getElementById('recordCanvas');
+    const recordCtx = recordCanvas.getContext('2d');
+    
+    const mainContainerVideo = document.getElementById('mainContainerVideo');
+    const statusBadgeVideo = document.getElementById('statusBadgeVideo');
+    const scannerMaskVideo = document.getElementById('scannerMaskVideo');
+    
+    const modalOverlayVideo = document.getElementById('modalOverlayVideo');
+    const modalMessageVideo = document.getElementById('modalMessageVideo');
+    const btnCloseModalVideo = document.getElementById('btnCloseModalVideo');
+
+    const duplicateModalOverlayVideo = document.getElementById('duplicateModalOverlayVideo');
+    const btnCloseDuplicateVideo = document.getElementById('btnCloseDuplicateVideo');
+    const pointingArrowVideo = document.getElementById('pointingArrowVideo');
+    
+    const btnSwitchCam = document.getElementById('btnSwitchCam');
+    const btnFlash = document.getElementById('btnFlash');
+    const btnMirrorLR = document.getElementById('btnMirrorLR');
+    const btnMirrorUD = document.getElementById('btnMirrorUD');
+    const btnManualStop = document.getElementById('btnManualStop');
+    const downloadLinkVideo = document.getElementById('downloadLinkVideo');
+
+    const tableBodyVideo = document.getElementById('tableBodyVideo');
+    const emptyStateVideo = document.getElementById('emptyStateVideo');
+    const recordCountVideo = document.getElementById('recordCountVideo');
+
+    let stream = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+    let isDecoding = false;
+    let useFrontCamera = false;
+    let flashOn = false;
+    let isMirrorLR = true;
+    let isMirrorUD = false;
+    let trackCapabilities = null;
+    
+    let detectedBarcodeText = "";
+    let formattedDateTime = "";
+    let fileDateString = "";
+    let scanInterval = null;
+    let canvasAnimationId = null;
+
+    let recordingSeconds = 0;
+    let recordingTimer = null;
+    let isDuplicateAlertActive = false;
+
+    let barcodeReader = null;
+    let scannerBuffer = "";
+    let scannerTimer = null;
+
+    Dynamsoft.DBR.BarcodeReader.license = 'DLS2eyJoYW5kc2hha2VDb2RlIjoiMTA2NDk4MTM4LU1UQTJORGs0TVRNNExYZGxZaTFVY21saGJGQnliMm8iLCJtYWluU2VydmVyVVJMIjoiaHR0cHM6Ly9tZGxzLmR5bmFtc29mdG9ubGluZS5jb20vIiwib3JnYW5pemF0aW9uSUQiOiIxMDY0OTgxMzgiLCJzdGFuZGJ5U2VydmVyVVJMIjoiaHR0cHM6Ly9zZGxzLmR5bmFtc29mdG9ubGluZS5jb20vIiwib3hlY2tDb2RlIjoyMDA0MTI1MTc1fQ==';
+
+    function showModalVideo(fileName) {
+        modalMessageVideo.innerHTML = `Video<br><b>${fileName}</b><br>berhasil didownload otomatis`;
+        modalOverlayVideo.classList.add('show');
+        btnCloseModalVideo.focus();
+    }
+
+    btnCloseModalVideo.addEventListener('click', () => {
+        modalOverlayVideo.classList.remove('show');
+    });
+
+    btnCloseDuplicateVideo.addEventListener('click', () => {
+        duplicateModalOverlayVideo.classList.remove('show');
+        pointingArrowVideo.style.display = 'none';
+        isDuplicateAlertActive = false;
+    });
+
+    function clearHighlightsVideo() {
+        const rows = tableBodyVideo.getElementsByTagName('tr');
+        for (let tr of rows) {
+            tr.classList.remove('highlight-row');
+        }
+        pointingArrowVideo.style.display = 'none';
+    }
+
+    function handleDuplicateBarcodeVideo(barcodeVal) {
+        if (isDuplicateAlertActive || isRecording) return;
+        isDuplicateAlertActive = true;
+        clearHighlightsVideo();
+
+        const rows = tableBodyVideo.getElementsByTagName('tr');
+        let targetRow = null;
+        for (let i = 0; i < todayListVideo.length; i++) {
+            if (cleanCode(todayListVideo[i]) === cleanCode(barcodeVal)) {
+                if (rows[i]) {
+                    targetRow = rows[i];
+                    rows[i].classList.add('highlight-row');
+                }
+            }
+        }
+        if (targetRow) {
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                const rowRect = targetRow.getBoundingClientRect();
+                pointingArrowVideo.style.top = `${rowRect.top + (rowRect.height / 2) - 22}px`;
+                pointingArrowVideo.style.left = `${rowRect.right + 12}px`;
+                pointingArrowVideo.style.display = 'block';
+            }, 200);
+        }
+        duplicateModalOverlayVideo.classList.add('show');
+        btnCloseDuplicateVideo.focus();
+    }
+
+    async function startVideoModule() {
+        try {
+            if (!barcodeReader) {
+                barcodeReader = await Dynamsoft.DBR.BarcodeReader.createInstance();
+            }
+            statusBadgeVideo.innerText = "Status: Menunggu Barcode Resi...";
+            initCameraVideo();
+        } catch (e) {
+            alert("Gagal memuat engine pemindai: " + e.message);
+        }
+    }
+
+    async function initCameraVideo() {
+        stopVideoCameraModule();
+        const constraints = {
+            video: { facingMode: useFrontCamera ? 'user' : 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: true
+        };
+        try {
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = stream;
+            await video.play();
+
+            const w = video.videoWidth || 1280;
+            const h = video.videoHeight || 720;
+            overlayCanvas.width = w; overlayCanvas.height = h;
+            recordCanvas.width = w; recordCanvas.height = h;
+
+            const videoTrack = stream.getVideoTracks()[0];
+            trackCapabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+            if (videoDevices.length > 1) btnSwitchCam.style.display = 'inline-block';
+
+            if (trackCapabilities.torch) btnFlash.style.display = 'inline-block';
+            else btnFlash.style.display = 'none';
+
+            updateVideoTransform();
+            startRenderLoopVideo();
+            if (!isRecording) startScanningVideo();
+        } catch (err) {
+            alert("Gagal mengakses kamera/mikrofon: " + err.message);
+        }
+    }
+
+    function stopVideoCameraModule() {
+        if (scanInterval) clearInterval(scanInterval);
+        if (canvasAnimationId) cancelAnimationFrame(canvasAnimationId);
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+    }
+
+    function startRenderLoopVideo() {
+        if (canvasAnimationId) cancelAnimationFrame(canvasAnimationId);
+        function render() {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            recordCtx.clearRect(0, 0, recordCanvas.width, recordCanvas.height);
+            recordCtx.drawImage(video, 0, 0, recordCanvas.width, recordCanvas.height);
+            if (isRecording) {
+                drawOverlayTextVideo(overlayCtx, overlayCanvas);
+                drawOverlayTextVideo(recordCtx, recordCanvas);
+            }
+            canvasAnimationId = requestAnimationFrame(render);
+        }
+        render();
+    }
+
+    function formatDurationVideo(totalSecs) {
+        const m = Math.floor(totalSecs / 60);
+        const s = totalSecs % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function drawOverlayTextVideo(targetCtx, targetCanvas) {
+        const paddingX = 20; const paddingY = 14;
+        const fontSize1 = Math.max(16, Math.floor(targetCanvas.height * 0.035));
+        const fontSize2 = Math.floor(fontSize1 * 0.9);
+        const line1 = detectedBarcodeText.toUpperCase();
+        const line2 = formattedDateTime;
+        const line3 = formatDurationVideo(recordingSeconds);
+
+        targetCtx.save();
+        targetCtx.textBaseline = 'top';
+        targetCtx.font = `bold ${fontSize1}px Arial`;
+        const textMetrics1 = targetCtx.measureText(line1);
+        targetCtx.font = `${fontSize2}px Arial`;
+        const textMetrics2 = targetCtx.measureText(line2);
+        
+        const maxTextWidth1 = Math.max(textMetrics1.width, textMetrics2.width);
+        const spacing = 6;
+        const boxHeight1 = fontSize1 + spacing + fontSize2 + (paddingY * 2);
+        const boxWidth1 = maxTextWidth1 + (paddingX * 2);
+        
+        const boxX1 = 30;
+        const boxY1 = targetCanvas.height - boxHeight1 - 30;
+
+        targetCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        targetCtx.fillRect(boxX1, boxY1, boxWidth1, boxHeight1);
+
+        targetCtx.fillStyle = '#FFFFFF';
+        targetCtx.font = `bold ${fontSize1}px Arial`;
+        targetCtx.fillText(line1, boxX1 + paddingX, boxY1 + paddingY);
+
+        targetCtx.font = `${fontSize2}px Arial`;
+        targetCtx.fillText(line2, boxX1 + paddingX, boxY1 + paddingY + fontSize1 + spacing);
+
+        const timerFontSize = Math.max(28, Math.floor(targetCanvas.height * 0.065)); 
+        targetCtx.font = `bold ${timerFontSize}px Arial`;
+        const textMetrics3 = targetCtx.measureText(line3);
+        const boxHeight2 = timerFontSize + (paddingY * 2);
+        const boxWidth2 = textMetrics3.width + (paddingX * 2);
+
+        const boxX2 = targetCanvas.width - boxWidth2 - 30;
+        const boxY2 = targetCanvas.height - boxHeight2 - 30;
+
+        targetCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        targetCtx.fillRect(boxX2, boxY2, boxWidth2, boxHeight2);
+
+        targetCtx.fillStyle = '#FFFFFF';
+        targetCtx.fillText(line3, boxX2 + paddingX, boxY2 + paddingY);
+
+        targetCtx.restore();
+    }
+
+    function getFormattedDateTimeVideo(date = new Date()) {
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12; hours = hours ? hours : 12;
+        const strHours = String(hours).padStart(2, '0');
+        fileDateString = `${date.getDate()} ${month} ${year}`;
+        return `${day}-${month}-${year} ${strHours}:${minutes} ${ampm}`;
+    }
+
+    function startScanningVideo() {
+        mainContainerVideo.classList.remove('is-recording');
+        video.style.display = 'block';
+        scannerMaskVideo.style.display = 'flex';
+        document.getElementById('infoScanning').style.display = 'block';
+        document.getElementById('infoRecording').style.display = 'none';
+        
+        if (scanInterval) clearInterval(scanInterval);
+
+        scanInterval = setInterval(async () => {
+            if (currentActiveApp !== 'video' || isRecording || isDecoding || isDuplicateAlertActive || !barcodeReader) return;
+            isDecoding = true;
+            try {
+                const results = await barcodeReader.decode(recordCanvas);
+                if (!isRecording && !isDuplicateAlertActive && results && results.length > 0) {
+                    const scannedVal = results[0].barcodeText;
+                    if (isDuplicateMaster(scannedVal, 'video')) {
+                        handleDuplicateBarcodeVideo(scannedVal);
+                    } else {
+                        clearHighlightsVideo();
+                        triggerRecordingVideo(scannedVal);
+                    }
+                }
+            } catch (e) {
+            } finally {
+                isDecoding = false;
+            }
+        }, 150);
+    }
+
+    function triggerRecordingVideo(barcodeVal) {
+        if (isRecording) return;
+        
+        sendPayloadToSheets("video_packing", barcodeVal);
+        if (scanInterval) clearInterval(scanInterval);
+
+        isRecording = true;
+        scannerMaskVideo.style.display = 'none';
+        mainContainerVideo.classList.add('is-recording');
+
+        document.getElementById('infoScanning').style.display = 'none';
+        document.getElementById('infoRecording').style.display = 'block';
+
+        detectedBarcodeText = barcodeVal;
+        formattedDateTime = getFormattedDateTimeVideo();
+
+        // Tambah ke memori lokal
+        const todayStr = getTodayString();
+        masterRecords.push({ code: detectedBarcodeText, date: todayStr, appType: 'video' });
+        saveMasterToStorage();
+
+        todayListVideo.push(detectedBarcodeText);
+        addResiToTableDOM(tableBodyVideo, emptyStateVideo, recordCountVideo, todayListVideo.length, detectedBarcodeText, '#video-view .table-container');
+
+        recordingSeconds = 0;
+        if (recordingTimer) clearInterval(recordingTimer);
+        recordingTimer = setInterval(() => { recordingSeconds++; }, 1000);
+
+        statusBadgeVideo.innerText = `Status: MEREKAM (Resi: ${detectedBarcodeText})`;
+        statusBadgeVideo.className = "status-badge status-recording";
+        btnManualStop.style.display = 'inline-block';
+        btnSwitchCam.style.display = 'none';
+        btnFlash.style.display = 'none';
+
+        if (document.activeElement) document.activeElement.blur();
+
+        const canvasStream = recordCanvas.captureStream(30);
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length > 0) canvasStream.addTrack(audioTracks[0]);
+
+        recordedChunks = [];
+        let options = { mimeType: 'video/mp4' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/webm; codecs=vp9' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/webm' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: '' };
+
+        try {
+            mediaRecorder = new MediaRecorder(canvasStream, options);
+        } catch (e) {
+            mediaRecorder = new MediaRecorder(canvasStream);
+        }
+
+        mediaRecorder.ondataavailable = function(event) {
+            if (event.data && event.data.size > 0) recordedChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = function() {
+            if (recordingTimer) clearInterval(recordingTimer);
+            const finalType = mediaRecorder.mimeType && mediaRecorder.mimeType.includes('mp4') ? 'video/mp4' : 'video/webm';
+            const blob = new Blob(recordedChunks, { type: finalType });
+            const videoUrl = URL.createObjectURL(blob);
+            const ext = finalType.includes('mp4') ? 'mp4' : 'webm';
+            
+            const cleanBarcode = detectedBarcodeText.replace(/[\/\\?%*:|"<>]/g, '_');
+            const customFileName = `${cleanBarcode} - ${fileDateString}.${ext}`;
+
+            downloadLinkVideo.href = videoUrl;
+            downloadLinkVideo.download = customFileName;
+            downloadLinkVideo.click();
+
+            showModalVideo(customFileName);
+
+            statusBadgeVideo.innerText = "Status: Menunggu Barcode Resi...";
+            statusBadgeVideo.className = "status-badge status-scanning";
+            btnManualStop.style.display = 'none';
+            
+            if (stream.getVideoTracks().length > 1) btnSwitchCam.style.display = 'inline-block';
+            if (trackCapabilities.torch) btnFlash.style.display = 'inline-block';
+
+            isRecording = false;
+            startScanningVideo();
+        };
+
+        mediaRecorder.start();
+    }
+
+    function stopRecordingVideo() {
+        if (!isRecording) return;
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+        }
+    }
+
+    function updateVideoTransform() {
+        const scaleX = isMirrorLR ? -1 : 1;
+        const scaleY = isMirrorUD ? -1 : 1;
+        video.style.transform = `scale(${scaleX}, ${scaleY})`;
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (currentActiveApp !== 'video') return;
+
+        if (modalOverlayVideo.classList.contains('show')) {
+            if (e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') {
+                e.preventDefault();
+                modalOverlayVideo.classList.remove('show');
+            }
+            return;
+        }
+
+        if (duplicateModalOverlayVideo.classList.contains('show')) {
+            if (e.key === 'Escape' || e.code === 'Escape') {
+                e.preventDefault();
+                duplicateModalOverlayVideo.classList.remove('show');
+                pointingArrowVideo.style.display = 'none';
+                isDuplicateAlertActive = false;
+            }
+            return;
+        }
+
+        if (e.code === 'Space') {
+            if (isRecording) {
+                e.preventDefault();
+                stopRecordingVideo();
+            }
+            return;
+        }
+
+        if (isRecording) return;
+
+        if (!isDuplicateAlertActive) {
+            if (e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') {
+                if (scannerBuffer.trim().length > 3) {
+                    e.preventDefault();
+                    const scannedCode = scannerBuffer.trim();
+                    scannerBuffer = "";
+
+                    if (isDuplicateMaster(scannedCode, 'video')) {
+                        handleDuplicateBarcodeVideo(scannedCode);
+                    } else {
+                        clearHighlightsVideo();
+                        triggerRecordingVideo(scannedCode);
+                    }
+                    return;
+                }
+                scannerBuffer = "";
+            } else if (e.key.length === 1) {
+                scannerBuffer += e.key;
+                clearTimeout(scannerTimer);
+                scannerTimer = setTimeout(() => { scannerBuffer = ""; }, 100);
+            }
+        }
+    });
+
+    btnManualStop.addEventListener('click', stopRecordingVideo);
+    btnSwitchCam.addEventListener('click', () => { useFrontCamera = !useFrontCamera; initCameraVideo(); });
+    btnFlash.addEventListener('click', async () => {
+        if (!trackCapabilities.torch) return;
+        flashOn = !flashOn;
+        try {
+            const videoTrack = stream.getVideoTracks()[0];
+            await videoTrack.applyConstraints({ advanced: [{ torch: flashOn }] });
+            btnFlash.innerText = `Flash: ${flashOn ? 'ON' : 'OFF'}`;
+            btnFlash.classList.toggle('active', flashOn);
+        } catch (err) { console.error("Gagal menyalakan flash:", err); }
+    });
+
+    btnMirrorLR.addEventListener('click', () => {
+        isMirrorLR = !isMirrorLR;
+        btnMirrorLR.classList.toggle('active', isMirrorLR);
+        btnMirrorLR.innerText = `Mirror Kanan-Kiri: ${isMirrorLR ? 'ON' : 'OFF'}`;
+        updateVideoTransform();
+        btnMirrorLR.blur();
+    });
+
+    btnMirrorUD.addEventListener('click', () => {
+        isMirrorUD = !isMirrorUD;
+        btnMirrorUD.classList.toggle('active', isMirrorUD);
+        btnMirrorUD.innerText = `Mirror Atas-Bawah: ${isMirrorUD ? 'ON' : 'OFF'}`;
+        updateVideoTransform();
+        btnMirrorUD.blur();
+    });
+
+    // =========================================================
+    // MODUL 3: RESI PICKUP KURIR
+    // =========================================================
+    const barcodeInputPickup = document.getElementById('barcodeInputPickup');
+    const tableBodyPickup = document.getElementById('tableBodyPickup');
+    const emptyStatePickup = document.getElementById('emptyStatePickup');
+    const scanCounterPickup = document.getElementById('scanCounterPickup');
+    const statusMessagePickup = document.getElementById('statusMessagePickup');
+    const duplicateModalPickup = document.getElementById('duplicateModalPickup');
+    const duplicateTextPickup = document.getElementById('duplicateTextPickup');
+    const btnCloseDuplicatePickup = document.getElementById('btnCloseDuplicatePickup');
+
+    let isModalOpenPickup = false;
+
+    function keepFocusPickup() {
+        if (currentActiveApp === 'pickup' && !isModalOpenPickup) {
+            barcodeInputPickup.focus();
+        }
+    }
+
+    document.addEventListener('click', keepFocusPickup);
+
+    function showDuplicateAlertPickup(resiCode) {
+        isModalOpenPickup = true;
+        duplicateTextPickup.innerHTML = `Resi <b>${resiCode}</b> sudah dimasukkan sebelumnya!`;
+        duplicateModalPickup.classList.add('show');
+        btnCloseDuplicatePickup.focus();
+    }
+
+    function closeDuplicateAlertPickup() {
+        duplicateModalPickup.classList.remove('show');
+        isModalOpenPickup = false;
+        barcodeInputPickup.value = '';
+        setTimeout(keepFocusPickup, 50);
+    }
+
+    btnCloseDuplicatePickup.addEventListener('click', closeDuplicateAlertPickup);
+
+    document.addEventListener('keydown', function(e) {
+        if (currentActiveApp === 'pickup' && isModalOpenPickup) {
+            if (e.key === 'Escape' || e.code === 'Escape') {
+                e.preventDefault();
+                closeDuplicateAlertPickup();
+            }
+        }
+    });
+
+    barcodeInputPickup.addEventListener('keydown', function(e) {
+        if (currentActiveApp !== 'pickup' || isModalOpenPickup) return;
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const resiVal = this.value.trim();
+            if (!resiVal) return;
+
+            if (isDuplicateMaster(resiVal, 'pickup')) {
+                statusMessagePickup.className = "scan-status duplicate";
+                statusMessagePickup.innerText = `DUPLIKAT: ${resiVal}`;
+                showDuplicateAlertPickup(resiVal);
+            } else {
+                // Tambahkan ke memori lokal
+                const todayStr = getTodayString();
+                masterRecords.push({ code: resiVal, date: todayStr, appType: 'pickup' });
+                saveMasterToStorage();
+
+                todayListPickup.push(resiVal);
+                addResiToTableDOM(tableBodyPickup, emptyStatePickup, scanCounterPickup, todayListPickup.length, resiVal, '#pickup-view .table-wrapper');
+
+                sendPayloadToSheets("pickup_kurir", resiVal);
+
+                statusMessagePickup.className = "scan-status success";
+                statusMessagePickup.innerText = `BERHASIL: ${resiVal}`;
+                this.value = '';
+            }
+        }
+    });
+
+    // INISIALISASI SAAT HALAMAN PERTAMA KALI DIBUKA / DI-REFRESH
+    window.addEventListener('DOMContentLoaded', () => {
+        loadMasterFromStorage();
+        renderTodayListsFromMaster();
+        syncDataFromGSheet();
+        syncOfflineQueue();
+    });
+</script>
+</body>
+</html>
