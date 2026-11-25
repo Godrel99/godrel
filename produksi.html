@@ -92,6 +92,23 @@ td .sch{font-size:12px;padding:1px 8px}
  .kb .vg{padding-top:8px}.kb .vgn{font-size:14px;padding:5px 8px;margin-bottom:2px;border-radius:9px;border:1px solid transparent}
  .kb .vr{padding:6px 8px;gap:6px;grid-template-columns:minmax(0,1fr) auto}.kb .vr .vq{font-size:14px}
 }
+/* ===== HP: tiap kartu tahap = satu layar (scroll-snap) + indikator auto-hide ===== */
+.kdots{display:none}
+@media(max-width:760px){
+ html:has(#pbody .sbs.kb){scroll-snap-type:y mandatory;scroll-padding-top:var(--alt,calc(var(--hh,52px) + var(--kh,0px)))}
+ #view:has(#pbody .sbs.kb){padding-bottom:66px!important}
+ #pbody .sbs.kb{gap:10px!important}
+ #pbody .sbs.kb>.sb{height:calc(100dvh - var(--alt,calc(var(--hh,52px) + var(--kh,0px))) - 66px - env(safe-area-inset-bottom,0px));min-height:260px;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always}
+ #pbody .sbs.kb .sbl{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-right:2px}
+ #pbody .sbs.kb .sbl::-webkit-scrollbar{display:none}
+ .kdots{display:flex;flex-direction:column;position:fixed;right:2px;top:calc(var(--alt,120px) + (100dvh - var(--alt,120px) - 66px - env(safe-area-inset-bottom,0px))/2);transform:translateY(-50%);z-index:8;padding:4px 0;border-radius:14px;background:rgba(14,14,14,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:auto;opacity:1;transition:opacity .15s ease-out}
+ .kdots.hide{opacity:0;pointer-events:none;transition:opacity .8s ease-in-out}
+ .kdots button{all:unset;box-sizing:border-box;display:grid;place-items:center;width:26px;height:36px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .kdots button::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--sc,#888);opacity:.4;transition:height .25s,opacity .25s,border-radius .25s}
+ .kdots button.on::before{height:18px;border-radius:3px;opacity:1}
+ .kdots button:active::before{opacity:1}
+}
+@media(prefers-reduced-motion:reduce){.kdots,.kdots.hide,.kdots i{transition:none}}
 /* popup proses */
 #pp{z-index:25}#pp .card.ppc{width:min(420px,100%);max-height:92vh;max-height:92dvh;padding:14px 16px}
 .ppc .pdt{border:0!important;box-shadow:none!important;padding:0;background:transparent!important;margin:0}
@@ -267,9 +284,20 @@ function flowView(){const q=pq.trim().toLowerCase(),all=groups().filter(g=>!q||g
   const ext=g=>{if(s==='rencana')return '<span class="vx">dipesan '+fds(ymd(g.date))+(g.due?' · butuh '+fds(g.due):'')+'</span>';if(s==='cetak'&&g.es)return '<span class="vx'+(W[g.k].lv===2?' bad':'')+'">sampai ± '+fds(g.es)+'</span>';return ''};
   return '<section class="sb'+(psel&&L.some(g=>g.k===psel)?' cur':'')+'" data-st="'+s+'" style="'+scv(s)+'"><div class="sbh"><span class="sbi">'+IC(SI2[s])+'</span><div class="sbt"><b><span class="sbn">'+(ix+1)+'</span>'+STL[s]+'</b><small>'+L.length+' item · '+dz(tot)+(nw?' · <span style="color:#ff6b6b">'+nw+' tertahan</span>':'')+'</small>'+(s!=='rencana'&&pjName(s)?'<small class="pjn">PJ: '+esc(pjName(s))+'</small>':'')+'</div><button class="ib sbp" title="Cetak A4 '+STL[s]+'" aria-label="Cetak A4 '+STL[s]+'" onclick="printStage(\''+s+'\')">'+IC('printer')+'</button></div><div class="sbl">'
   +(names.map(b=>'<div class="vg"><div class="vgn">'+esc(b)+'</div>'+by[b].sort((x,y)=>x.s.localeCompare(y.s,'id',{numeric:true})).map(x=>'<button class="vr'+(x.g.k===psel?' on':'')+'" onclick="ppOpen(\''+esc(x.g.k)+'\')" title="Klik untuk memproses"><span class="vs">'+wdot(W[x.g.k])+esc(x.s||'Standar')+(multi?'<small> · '+esc(gname(x.g.loc))+'</small>':'')+'</span><span class="vq" title="'+nf(x.g.qty)+' pcs">'+dz(x.g.qty)+'</span>'+ext(x.g)+'</button>').join('')+'</div>').join('')||'<div class="sbe">Kosong</div>')+'</div></section>'};
+ const _sv={};document.querySelectorAll('#pbody .sbl').forEach(e=>{const s=e.closest('.sb');if(s)_sv[s.dataset.st]=e.scrollTop});
  $('pbody').innerHTML='<div class="sk2"><div class="pbar">'+(gl.length>1?'<select onchange="pg=this.value;flowView()"><option value="Semua"'+(pg==='Semua'?' selected':'')+'>Semua gudang</option>'+gl.map(g=>'<option value="'+esc(g.id)+'"'+(g.id===pg?' selected':'')+'>'+esc(g.name)+'</option>').join('')+'</select>':'')+'<input id="pq" placeholder="Cari produk" value="'+esc(pq)+'" oninput="pfs(this.value)">'+(()=>{const hc=lkHabis('bahan'),hj=lkHabis('cutting');return '<button class="btn sec lkb lkc" onclick="printKerja(\'bahan\')" title="Cetak lembar kerja tim Cutting dari rak bahan (A4). Stok diambil terbaru dulu.">'+IC('scissors')+'<span><b>Lembar Cutting</b><small>dari rak bahan'+(hc?' <i>'+hc+' habis</i>':'')+'</small></span></button><button class="btn sec lkb lkj" onclick="printKerja(\'cutting\')" title="Cetak lembar kerja tim Jahit dari rak cutting (A4). Stok diambil terbaru dulu.">'+IC('shirt')+'<span><b>Lembar Jahit</b><small>dari rak cutting'+(hj?' <i>'+hj+' habis</i>':'')+'</small></span></button>'})()+(n2?'<span class="wb w2">&#9888; '+n2+' tertahan / lewat tanggal</span>':'')+(n1?'<span class="wb w1">'+n1+' mendekati batas</span>':'')+'</div></div>'
  +'<div class="sbs kb">'+RS2.map(box).join('')+'</div>';
- stk()}
+ document.querySelectorAll('#pbody .sb').forEach(s=>{const e=s.querySelector('.sbl');if(e&&_sv[s.dataset.st])e.scrollTop=_sv[s.dataset.st]});
+ stk();kdInit()}
+/* ---------- indikator kartu (HP): tampil saat scroll, memudar pelan saat diam ---------- */
+let kdT=0,kdR=0,kdOn=false;
+function kdAlt(){const s=document.querySelector('#pbody .sk2');if(!s)return 0;const t=parseFloat(getComputedStyle(s).top)||0;return Math.round(t+s.offsetHeight)}
+function kdPos(){const a=kdAlt();if(a)document.documentElement.style.setProperty('--alt',a+'px')}
+function kdUpd(){kdR=0;const d=document.querySelector('.kdots');if(!d)return;const cs=[...document.querySelectorAll('#pbody .sbs.kb>.sb')],a=kdAlt();let b=0,m=1e9;cs.forEach((c,i)=>{const x=Math.abs(c.getBoundingClientRect().top-a);if(x<m){m=x;b=i}});[...d.children].forEach((e,i)=>{e.classList.toggle('on',i===b);if(i===b)e.setAttribute('aria-current','true');else e.removeAttribute('aria-current')});if(cs[b])d.style.setProperty('--sc',getComputedStyle(cs[b]).getPropertyValue('--sc'))}
+function kdShow(){const d=document.querySelector('.kdots');if(!d)return;d.classList.remove('hide');clearTimeout(kdT);kdT=setTimeout(()=>d.classList.add('hide'),1400)}
+function kdInit(){kdPos();let d=document.querySelector('.kdots');const cs=document.querySelectorAll('#pbody .sbs.kb>.sb');if(!d){d=document.createElement('div');d.className='kdots';d.setAttribute('role','navigation');d.setAttribute('aria-label','Pindah kartu tahap');d.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const c=document.querySelectorAll('#pbody .sbs.kb>.sb')[+b.dataset.i];if(c)c.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});kdShow()};document.body.appendChild(d)}
+ d.innerHTML=[...cs].map((c,i)=>{const t=c.querySelector('.sbt b');return '<button type="button" data-i="'+i+'" aria-label="'+(t?t.textContent.replace(/"/g,''):'Kartu '+(i+1))+'" style="'+(c.getAttribute('style')||'')+'"></button>'}).join('');kdUpd();kdShow();
+ if(!kdOn){kdOn=true;addEventListener('scroll',()=>{if(!document.querySelector('#pbody .sbs.kb')){const x=document.querySelector('.kdots');if(x)x.remove();return}if(!kdR)kdR=requestAnimationFrame(kdUpd);kdShow()},{passive:true});addEventListener('resize',()=>{kdPos();kdUpd()})}}
 /* ---------- popup proses: muncul saat jumlah diklik ---------- */
 if(!ICO.truck)ICO.truck='<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>';
 if(!ICO.pencil)ICO.pencil='<path d="M21.17 6.81a1 1 0 0 0-3.98-3.98L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/><path d="m15 5 4 4"/>';
