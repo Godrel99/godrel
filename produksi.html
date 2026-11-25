@@ -95,11 +95,11 @@ td .sch{font-size:12px;padding:1px 8px}
 /* ===== HP: tiap kartu tahap = satu layar (scroll-snap) + indikator auto-hide ===== */
 .kdots{display:none}
 @media(max-width:760px){
- html:has(#pbody .sbs.kb){scroll-snap-type:y mandatory;scroll-padding-top:var(--alt,calc(var(--hh,52px) + var(--kh,0px)))}
+ html:has(#pbody .sbs.kb){scroll-padding-top:var(--alt,calc(var(--hh,52px) + var(--kh,0px)))}
  #view:has(#pbody .sbs.kb){padding-bottom:66px!important}
  #pbody .sbs.kb{gap:10px!important}
  #pbody .sbs.kb>.sb{height:calc(100dvh - var(--alt,calc(var(--hh,52px) + var(--kh,0px))) - 66px - env(safe-area-inset-bottom,0px));min-height:260px;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always}
- #pbody .sbs.kb .sbl{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-right:2px}
+ #pbody .sbs.kb .sbl{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-right:2px}
  #pbody .sbs.kb .sbl::-webkit-scrollbar{display:none}
  .kdots{display:flex;flex-direction:column;position:fixed;right:2px;top:calc(var(--alt,120px) + (100dvh - var(--alt,120px) - 66px - env(safe-area-inset-bottom,0px))/2);transform:translateY(-50%);z-index:8;padding:4px 0;border-radius:14px;background:rgba(14,14,14,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:auto;opacity:1;transition:opacity .15s ease-out}
  .kdots.hide{opacity:0;pointer-events:none;transition:opacity .8s ease-in-out}
@@ -294,10 +294,24 @@ let kdT=0,kdR=0,kdOn=false;
 function kdAlt(){const s=document.querySelector('#pbody .sk2');if(!s)return 0;const t=parseFloat(getComputedStyle(s).top)||0;return Math.round(t+s.offsetHeight)}
 function kdPos(){const a=kdAlt();if(a)document.documentElement.style.setProperty('--alt',a+'px')}
 function kdUpd(){kdR=0;const d=document.querySelector('.kdots');if(!d)return;const cs=[...document.querySelectorAll('#pbody .sbs.kb>.sb')],a=kdAlt();let b=0,m=1e9;cs.forEach((c,i)=>{const x=Math.abs(c.getBoundingClientRect().top-a);if(x<m){m=x;b=i}});[...d.children].forEach((e,i)=>{e.classList.toggle('on',i===b);if(i===b)e.setAttribute('aria-current','true');else e.removeAttribute('aria-current')});if(cs[b])d.style.setProperty('--sc',getComputedStyle(cs[b]).getPropertyValue('--sc'))}
+let kdAn=false,kdTouch=false,kdS=0,kdG=null;
+const kdOK=()=>matchMedia('(max-width:760px)').matches&&document.querySelector('#pbody .sbs.kb')&&!document.querySelector('.modal.on');
+const kdCards=()=>[...document.querySelectorAll('#pbody .sbs.kb>.sb')];
+const kdY=c=>Math.round(c.getBoundingClientRect().top+scrollY-kdAlt());
+function kdCur(){const a=kdAlt();let b=0,m=1e9;kdCards().forEach((c,i)=>{const x=Math.abs(c.getBoundingClientRect().top-a);if(x<m){m=x;b=i}});return b}
+function kdAnim(y){const y0=scrollY,d=y-y0,ms=matchMedia('(prefers-reduced-motion:reduce)').matches?0:220;if(Math.abs(d)<2||!ms){kdAn=false;scrollTo(0,y);return}kdAn=true;const t0=performance.now(),tk=kdAn=Symbol();requestAnimationFrame(function f(t){if(kdAn!==tk)return;const p=Math.min(1,(t-t0)/ms),e=1-Math.pow(1-p,3);scrollTo(0,y0+d*e);if(p<1)requestAnimationFrame(f);else kdAn=false})}
+function kdGo(i){const cs=kdCards();if(!cs.length)return;i=Math.max(0,Math.min(cs.length-1,i));kdAnim(kdY(cs[i]))}
+function kdSettle(){if(kdAn||kdTouch||!kdOK())return;const cs=kdCards();if(!cs.length)return;const c=cs[kdCur()];if(Math.abs(kdY(c)-scrollY)>3)kdAnim(kdY(c))}
+function kdTS(ev){kdG=null;if(!kdOK())return;kdTouch=true;kdAn=false;const t=ev.touches[0],l=ev.target.closest&&ev.target.closest('.sbl');kdG={x:t.clientX,y:t.clientY,t:performance.now(),l,top:l?l.scrollTop<=1:true,bot:l?l.scrollTop+l.clientHeight>=l.scrollHeight-1:true,mode:'',dy:0,fired:false}}
+function kdTM(ev){const g=kdG;if(!g)return;const t=ev.touches[0],dx=t.clientX-g.x,dy=t.clientY-g.y;g.dy=dy;
+ if(!g.mode){if(Math.abs(dx)<6&&Math.abs(dy)<6)return;if(Math.abs(dx)>Math.abs(dy)){g.mode='x';return}const up=dy<0;g.mode=(g.l&&((up&&!g.bot)||(!up&&!g.top)))?'list':'page'}
+ if(g.mode!=='page')return;if(ev.cancelable)ev.preventDefault();
+ if(!g.fired&&Math.abs(dy)>28){g.fired=true;kdGo(kdCur()+(dy<0?1:-1))}}
+function kdTE(){const g=kdG;kdTouch=false;kdG=null;if(!g)return;if(g.mode==='page'&&!g.fired){const v=Math.abs(g.dy)/Math.max(1,performance.now()-g.t);if(v>.3&&Math.abs(g.dy)>10)kdGo(kdCur()+(g.dy<0?1:-1));else kdGo(kdCur())}else if(g.mode!=='page')clearTimeout(kdS),kdS=setTimeout(kdSettle,160)}
 function kdShow(){const d=document.querySelector('.kdots');if(!d)return;d.classList.remove('hide');clearTimeout(kdT);kdT=setTimeout(()=>d.classList.add('hide'),1400)}
-function kdInit(){kdPos();let d=document.querySelector('.kdots');const cs=document.querySelectorAll('#pbody .sbs.kb>.sb');if(!d){d=document.createElement('div');d.className='kdots';d.setAttribute('role','navigation');d.setAttribute('aria-label','Pindah kartu tahap');d.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const c=document.querySelectorAll('#pbody .sbs.kb>.sb')[+b.dataset.i];if(c)c.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});kdShow()};document.body.appendChild(d)}
+function kdInit(){kdPos();let d=document.querySelector('.kdots');const cs=document.querySelectorAll('#pbody .sbs.kb>.sb');if(!d){d=document.createElement('div');d.className='kdots';d.setAttribute('role','navigation');d.setAttribute('aria-label','Pindah kartu tahap');d.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const c=document.querySelectorAll('#pbody .sbs.kb>.sb')[+b.dataset.i];kdGo(+b.dataset.i);kdShow()};document.body.appendChild(d)}
  d.innerHTML=[...cs].map((c,i)=>{const t=c.querySelector('.sbt b');return '<button type="button" data-i="'+i+'" aria-label="'+(t?t.textContent.replace(/"/g,''):'Kartu '+(i+1))+'" style="'+(c.getAttribute('style')||'')+'"></button>'}).join('');kdUpd();kdShow();
- if(!kdOn){kdOn=true;addEventListener('scroll',()=>{if(!document.querySelector('#pbody .sbs.kb')){const x=document.querySelector('.kdots');if(x)x.remove();return}if(!kdR)kdR=requestAnimationFrame(kdUpd);kdShow()},{passive:true});addEventListener('resize',()=>{kdPos();kdUpd()})}}
+ if(!kdOn){kdOn=true;addEventListener('scroll',()=>{if(!document.querySelector('#pbody .sbs.kb')){const x=document.querySelector('.kdots');if(x)x.remove();return}if(!kdR)kdR=requestAnimationFrame(kdUpd);kdShow();clearTimeout(kdS);kdS=setTimeout(kdSettle,160)},{passive:true});document.addEventListener('touchstart',kdTS,{passive:true});document.addEventListener('touchmove',kdTM,{passive:false});document.addEventListener('touchend',kdTE,{passive:true});document.addEventListener('touchcancel',kdTE,{passive:true});addEventListener('resize',()=>{kdPos();kdUpd()})}}
 /* ---------- popup proses: muncul saat jumlah diklik ---------- */
 if(!ICO.truck)ICO.truck='<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>';
 if(!ICO.pencil)ICO.pencil='<path d="M21.17 6.81a1 1 0 0 0-3.98-3.98L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/><path d="m15 5 4 4"/>';
