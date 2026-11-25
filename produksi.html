@@ -136,17 +136,19 @@ td .sch{font-size:12px;padding:1px 8px}
  #pbody .sbs.kb .vr .vq{font-size:17px;font-weight:600}
  #pbody .sbs.kb .vr .vx{margin-top:0;font-size:12.5px}
  #pbody .sbs.kb .sbe{padding:20px 8px}
+ #pbody .sbs.kb .sbn{display:none}
+ #hm{z-index:30}
  /* nama kartu menempel di bawah nav saat judul besar tergulung */
- .kbar.on{display:flex;position:fixed;left:0;right:0;height:38px;gap:6px;padding:0 16px;z-index:6;background:color-mix(in srgb,var(--sc) 10%,var(--card));border-bottom:1px solid color-mix(in srgb,var(--sc) 45%,transparent);box-shadow:0 8px 12px -8px rgba(0,0,0,.7)}
- .kbar button{all:unset;box-sizing:border-box;position:relative;flex:1 1 0;min-width:0;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--sc);transition:flex-grow .22s ease}
- .kbar button::before{content:"";position:absolute;left:2px;right:2px;top:50%;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--sc);opacity:.5;transition:opacity .2s}
+ .kbar.on{display:flex;position:fixed;left:0;right:0;height:30px;gap:6px;padding:0 14px;z-index:6;background:color-mix(in srgb,var(--sc) 10%,var(--card));border-bottom:1px solid color-mix(in srgb,var(--sc) 45%,transparent);box-shadow:0 6px 10px -8px rgba(0,0,0,.7)}
+ .kbar button{all:unset;box-sizing:border-box;position:relative;flex:1 1 0;min-width:0;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--sc);transition:flex-grow .22s ease}
+ .kbar button::before{content:"";position:absolute;left:2px;right:2px;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:var(--sc);opacity:.5;transition:opacity .2s}
  .kbar button:active::before{opacity:.95}
- .kbar button span{font:600 15px/1 Barlow,sans-serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .2s}
+ .kbar button span{font:600 13px/1 Barlow,sans-serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .2s}
  .kbar button.on{flex-grow:3}
  .kbar button.on::before{opacity:0}
  .kbar button.on span{opacity:1}
  .kbar button:focus-visible{outline:2px solid var(--sc);outline-offset:-2px;border-radius:6px}
- #pbody .sbs.kb>.sb:last-child{min-height:calc(100dvh - var(--kbT,140px) - 46px - 84px - env(safe-area-inset-bottom,0px))}
+ #pbody .sbs.kb>.sb:last-child{min-height:calc(100dvh - var(--kbT,140px) - 38px - 84px - env(safe-area-inset-bottom,0px))}
  @media(prefers-reduced-motion:reduce){.kbar button,.kbar button::before,.kbar button span{transition:none}}
 }
 @media(prefers-reduced-motion:reduce){.kdots,.kdots.hide,.kdots i{transition:none}}
@@ -354,7 +356,7 @@ function kdInit(){kdPos();let d=document.querySelector('.kdots');const cs=docume
  d.innerHTML=[...cs].map((c,i)=>{const t=c.querySelector('.sbt b');return '<button type="button" data-i="'+i+'" aria-label="'+(t?t.textContent.replace(/"/g,''):'Kartu '+(i+1))+'" style="'+(c.getAttribute('style')||'')+'"></button>'}).join('');kdUpd();kdShow();
  if(!kdOn){kdOn=true;addEventListener('scroll',()=>{if(!document.querySelector('#pbody .sbs.kb')){const x=document.querySelector('.kdots');if(x)x.remove();return}if(!kdR)kdR=requestAnimationFrame(kdUpd);kdShow();clearTimeout(kdS);kdS=setTimeout(kdSettle,160)},{passive:true});document.addEventListener('touchstart',kdTS,{passive:true});document.addEventListener('touchmove',kdTM,{passive:false});document.addEventListener('touchend',kdTE,{passive:true});document.addEventListener('touchcancel',kdTE,{passive:true});addEventListener('resize',()=>{kdPos();kdUpd()})}}
 /* ---------- bar indikator kartu (HP): garis berwarna per tahap, kartu aktif tampil sebagai nama, garis bisa diketuk untuk lompat ---------- */
-let kbOn=false,kbR=0;const kbH=38;
+let kbOn=false,kbR=0;const kbH=30;
 function kbTop(){let e=document.elementFromPoint(innerWidth/2,4),h=0;while(e&&e!==document.body&&e!==document.documentElement){const p=getComputedStyle(e).position;if(p==='fixed'||p==='sticky')h=Math.max(h,e.getBoundingClientRect().bottom);e=e.parentElement}return h||parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hh'))||52}
 function kbBar(cs){let b=document.querySelector('.kbar');if(!b){b=document.createElement('div');b.className='kbar';b.setAttribute('role','navigation');b.setAttribute('aria-label','Pindah kartu tahap');b.onclick=ev=>{const x=ev.target.closest('button');if(x)kbGo(+x.dataset.i)};document.body.appendChild(b)}
  const sig=cs.map(c=>c.dataset.st).join();
@@ -364,8 +366,8 @@ function kbUpd(){kbR=0;const cs=[...document.querySelectorAll('#pbody .sbs.kb>.s
  if(!cs.length||!matchMedia('(max-width:760px)').matches||document.querySelector('.modal.on')){if(b)b.classList.remove('on');return}
  const T=Math.round(kbTop());document.documentElement.style.setProperty('--kbT',T+'px');
  b=kbBar(cs);
- if(cs[0].getBoundingClientRect().top>T+60||cs[cs.length-1].getBoundingClientRect().bottom<T+kbH){b.classList.remove('on');return}
- let a=0;cs.forEach((c,i)=>{if(c.getBoundingClientRect().top<=T+60)a=i});
+ if(cs[0].getBoundingClientRect().top>T+kbH+18||cs[cs.length-1].getBoundingClientRect().bottom<T+kbH){b.classList.remove('on');return}
+ let a=0;cs.forEach((c,i)=>{if(c.getBoundingClientRect().top<=T+kbH+18)a=i});
  b.style.top=T+'px';b.style.setProperty('--sc',getComputedStyle(cs[a]).getPropertyValue('--sc'));
  [...b.children].forEach((x,i)=>{x.classList.toggle('on',i===a);if(i===a)x.setAttribute('aria-current','true');else x.removeAttribute('aria-current')});
  b.classList.add('on')}
