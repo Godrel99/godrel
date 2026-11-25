@@ -118,7 +118,7 @@ td .sch{font-size:12px;padding:1px 8px}
  #pbody .sbs.kb>.sb[data-st]{height:auto!important;min-height:0;overflow:visible;scroll-snap-align:none;scroll-snap-stop:normal;padding:18px 16px 10px;gap:0;border-radius:20px;border-color:color-mix(in srgb,var(--sc) 38%,transparent)!important;background:linear-gradient(180deg,color-mix(in srgb,var(--sc) 8%,transparent),transparent 140px),var(--card)!important;box-shadow:none!important}
  #pbody .sbs.kb>.sb[data-st].cur{border-color:var(--sc)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--sc) 35%,transparent)!important}
  /* kepala kartu: judul satu baris, meta satu baris, pemisah tipis ke isi */
- #pbody .sbs.kb .sbh{display:flex;align-items:center;gap:12px;padding:0 0 14px;margin:0 0 2px;border-bottom:1px solid color-mix(in srgb,var(--sc) 22%,transparent)}
+ #pbody .sbs.kb .sbh{position:sticky;top:calc(var(--hh,52px) + var(--kh,0px));z-index:3;display:flex;align-items:center;gap:12px;margin:-18px -16px 2px;padding:16px 16px 14px;border-radius:19px 19px 0 0;background:color-mix(in srgb,var(--sc) 8%,var(--card));border-bottom:1px solid color-mix(in srgb,var(--sc) 22%,transparent)}
  #pbody .sbs.kb .sbi{width:40px;height:40px;flex:none;border-radius:12px}
  #pbody .sbs.kb .sbt{display:block;flex:1;min-width:0}
  #pbody .sbs.kb .sbt b{display:block;font-size:22px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
