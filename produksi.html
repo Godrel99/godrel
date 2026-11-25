@@ -137,7 +137,17 @@ td .sch{font-size:12px;padding:1px 8px}
  #pbody .sbs.kb .vr .vx{margin-top:0;font-size:12.5px}
  #pbody .sbs.kb .sbe{padding:20px 8px}
  /* nama kartu menempel di bawah nav saat judul besar tergulung */
- .kbar.on{display:flex;position:fixed;left:0;right:0;height:38px;align-items:center;padding:0 20px;z-index:6;font:600 15px/1 Barlow,sans-serif;letter-spacing:.02em;color:var(--sc);background:color-mix(in srgb,var(--sc) 10%,var(--card));border-bottom:1px solid color-mix(in srgb,var(--sc) 45%,transparent);box-shadow:0 8px 12px -8px rgba(0,0,0,.7)}
+ .kbar.on{display:flex;position:fixed;left:0;right:0;height:38px;gap:6px;padding:0 16px;z-index:6;background:color-mix(in srgb,var(--sc) 10%,var(--card));border-bottom:1px solid color-mix(in srgb,var(--sc) 45%,transparent);box-shadow:0 8px 12px -8px rgba(0,0,0,.7)}
+ .kbar button{all:unset;box-sizing:border-box;position:relative;flex:1 1 0;min-width:0;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--sc);transition:flex-grow .22s ease}
+ .kbar button::before{content:"";position:absolute;left:2px;right:2px;top:50%;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--sc);opacity:.5;transition:opacity .2s}
+ .kbar button:active::before{opacity:.95}
+ .kbar button span{font:600 15px/1 Barlow,sans-serif;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .2s}
+ .kbar button.on{flex-grow:3}
+ .kbar button.on::before{opacity:0}
+ .kbar button.on span{opacity:1}
+ .kbar button:focus-visible{outline:2px solid var(--sc);outline-offset:-2px;border-radius:6px}
+ #pbody .sbs.kb>.sb:last-child{min-height:calc(100dvh - var(--kbT,140px) - 46px - 84px - env(safe-area-inset-bottom,0px))}
+ @media(prefers-reduced-motion:reduce){.kbar button,.kbar button::before,.kbar button span{transition:none}}
 }
 @media(prefers-reduced-motion:reduce){.kdots,.kdots.hide,.kdots i{transition:none}}
 /* popup proses */
@@ -343,16 +353,23 @@ function kdShow(){const d=document.querySelector('.kdots');if(!d)return;d.classL
 function kdInit(){kdPos();let d=document.querySelector('.kdots');const cs=document.querySelectorAll('#pbody .sbs.kb>.sb');if(!d){d=document.createElement('div');d.className='kdots';d.setAttribute('role','navigation');d.setAttribute('aria-label','Pindah kartu tahap');d.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const c=document.querySelectorAll('#pbody .sbs.kb>.sb')[+b.dataset.i];kdGo(+b.dataset.i);kdShow()};document.body.appendChild(d)}
  d.innerHTML=[...cs].map((c,i)=>{const t=c.querySelector('.sbt b');return '<button type="button" data-i="'+i+'" aria-label="'+(t?t.textContent.replace(/"/g,''):'Kartu '+(i+1))+'" style="'+(c.getAttribute('style')||'')+'"></button>'}).join('');kdUpd();kdShow();
  if(!kdOn){kdOn=true;addEventListener('scroll',()=>{if(!document.querySelector('#pbody .sbs.kb')){const x=document.querySelector('.kdots');if(x)x.remove();return}if(!kdR)kdR=requestAnimationFrame(kdUpd);kdShow();clearTimeout(kdS);kdS=setTimeout(kdSettle,160)},{passive:true});document.addEventListener('touchstart',kdTS,{passive:true});document.addEventListener('touchmove',kdTM,{passive:false});document.addEventListener('touchend',kdTE,{passive:true});document.addEventListener('touchcancel',kdTE,{passive:true});addEventListener('resize',()=>{kdPos();kdUpd()})}}
-/* ---------- nama kartu menempel di bawah nav (HP): muncul saat judul kartu tergulung ke atas ---------- */
-let kbOn=false,kbR=0;
+/* ---------- bar indikator kartu (HP): garis berwarna per tahap, kartu aktif tampil sebagai nama, garis bisa diketuk untuk lompat ---------- */
+let kbOn=false,kbR=0;const kbH=38;
 function kbTop(){let e=document.elementFromPoint(innerWidth/2,4),h=0;while(e&&e!==document.body&&e!==document.documentElement){const p=getComputedStyle(e).position;if(p==='fixed'||p==='sticky')h=Math.max(h,e.getBoundingClientRect().bottom);e=e.parentElement}return h||parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hh'))||52}
-function kbUpd(){kbR=0;let b=document.querySelector('.kbar');const cs=[...document.querySelectorAll('#pbody .sbs.kb>.sb')];
+function kbBar(cs){let b=document.querySelector('.kbar');if(!b){b=document.createElement('div');b.className='kbar';b.setAttribute('role','navigation');b.setAttribute('aria-label','Pindah kartu tahap');b.onclick=ev=>{const x=ev.target.closest('button');if(x)kbGo(+x.dataset.i)};document.body.appendChild(b)}
+ const sig=cs.map(c=>c.dataset.st).join();
+ if(b.dataset.sig!==sig){b.dataset.sig=sig;b.innerHTML=cs.map((c,i)=>{const t=c.querySelector('.sbt b'),n=t&&t.lastChild?t.lastChild.textContent:'Kartu '+(i+1);return '<button type="button" data-i="'+i+'" aria-label="'+n.replace(/"/g,'')+'" style="'+(c.getAttribute('style')||'')+'"><span>'+esc(n)+'</span></button>'}).join('')}
+ return b}
+function kbUpd(){kbR=0;const cs=[...document.querySelectorAll('#pbody .sbs.kb>.sb')];let b=document.querySelector('.kbar');
  if(!cs.length||!matchMedia('(max-width:760px)').matches||document.querySelector('.modal.on')){if(b)b.classList.remove('on');return}
- if(!b){b=document.createElement('div');b.className='kbar';b.setAttribute('aria-hidden','true');document.body.appendChild(b)}
- const T=Math.round(kbTop());let a=null;
- cs.forEach(c=>{const r=c.getBoundingClientRect(),h=c.querySelector('.sbh');if(r.top<=T&&r.bottom>T+24&&h&&h.getBoundingClientRect().bottom<=T+2)a=c});
- if(!a){b.classList.remove('on');return}
- const t=a.querySelector('.sbt b');b.textContent=t&&t.lastChild?t.lastChild.textContent:'';b.style.top=T+'px';b.style.setProperty('--sc',getComputedStyle(a).getPropertyValue('--sc'));b.classList.add('on')}
+ const T=Math.round(kbTop());document.documentElement.style.setProperty('--kbT',T+'px');
+ b=kbBar(cs);
+ if(cs[0].getBoundingClientRect().top>T+60||cs[cs.length-1].getBoundingClientRect().bottom<T+kbH){b.classList.remove('on');return}
+ let a=0;cs.forEach((c,i)=>{if(c.getBoundingClientRect().top<=T+60)a=i});
+ b.style.top=T+'px';b.style.setProperty('--sc',getComputedStyle(cs[a]).getPropertyValue('--sc'));
+ [...b.children].forEach((x,i)=>{x.classList.toggle('on',i===a);if(i===a)x.setAttribute('aria-current','true');else x.removeAttribute('aria-current')});
+ b.classList.add('on')}
+function kbGo(i){const c=document.querySelectorAll('#pbody .sbs.kb>.sb')[i];if(!c)return;const T=Math.round(kbTop()),y=c.getBoundingClientRect().top+scrollY-T-kbH-8;scrollTo({top:Math.max(0,y),behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}
 function kbInit(){if(!kbOn){kbOn=true;const q=()=>{if(!kbR)kbR=requestAnimationFrame(kbUpd)};addEventListener('scroll',q,{passive:true});addEventListener('resize',q);addEventListener('click',()=>setTimeout(q,60),true)}kbUpd()}
 /* ---------- popup proses: muncul saat jumlah diklik ---------- */
 if(!ICO.truck)ICO.truck='<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>';
