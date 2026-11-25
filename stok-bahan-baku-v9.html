@@ -253,6 +253,21 @@ dialog label.cbx,.cbx{position:relative;display:inline-grid;place-items:center;w
 @media(max-width:760px){.sbar{bottom:84px;padding:10px 12px}.sbar>.mu{display:none}.orw{grid-template-columns:24px 1fr auto;row-gap:6px}.orw>:nth-child(4){grid-column:2;grid-row:2}.orw>:nth-child(5){grid-column:3;grid-row:2;justify-self:end}
  .mr2{grid-template-columns:1fr 86px auto}.mr2>.mu{display:none}.mr2 input{width:86px!important}.ih h3{font-size:24px}.ir{gap:8px;padding:8px}.irq{font-size:20px;min-width:34px}.g2{grid-template-columns:1fr}}
 @media(max-width:480px){.dvg{grid-template-columns:1fr!important}#sync{display:none}header .sp{display:none}}
+/* ===== HP: bar bawah minimalis menempel ke tepi layar (samakan dengan Positif POS) ===== */
+@media(max-width:760px){
+ html,body{overscroll-behavior-y:none}
+ #rail{left:0;right:0;bottom:0;top:auto;width:auto;height:calc(56px + env(safe-area-inset-bottom,0px));padding:0 0 env(safe-area-inset-bottom,0px);gap:0;border:0;border-top:1px solid var(--bd);border-radius:0;box-shadow:none;background:#0c0c0c;-webkit-backdrop-filter:none;backdrop-filter:none;justify-content:space-around;overflow-x:auto;transform:translate3d(0,0,0);will-change:transform}
+ #rail .ri{flex:1 0 auto;width:auto;min-width:56px;height:56px;gap:3px;border:0;border-radius:0;background:transparent!important;box-shadow:none!important;color:#8d8d88;font:500 11px/1 "Barlow Semi Condensed",sans-serif}
+ #rail .ri:hover{background:transparent;border:0;color:#8d8d88}
+ #rail .ri svg{width:23px;height:23px;stroke-width:1.7}
+ #rail .ri.on{background:transparent!important;box-shadow:none!important;color:var(--ac)!important;font-weight:600}
+ #rail .ri.on svg{fill:currentColor;stroke:#0c0c0c}
+ #rail .bg{top:3px;right:calc(50% - 24px)}
+ .app{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+ .rmm{bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+ .sbar{bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+ #toast{bottom:calc(68px + env(safe-area-inset-bottom,0px))}
+}
 .mvn{min-width:48px}
 </style>
 <script src="posbar.js?v=20261123a"></script>
