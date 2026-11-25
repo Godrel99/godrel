@@ -12,6 +12,22 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="tema.css?v=20261125b">
+<style>
+/* ===== HP: judul tabel/daftar tidak ikut tergulung ===== */
+@media(max-width:760px){
+ /* Riwayat: kartu seukuran layar, judul kolom tetap, hanya baris data yang bergulir */
+ html:has(#pbody .rw){overflow:auto}
+ #view.fit:has(#pbody .rw),#view.fit:has(#pbody .lp){height:auto;overflow:visible;display:block}
+ .card.rw{flex:none;height:calc(100dvh - var(--hh,52px) - 124px - env(safe-area-inset-top,0px) - 2*env(safe-area-inset-bottom,0px));min-height:280px}
+ .card.rw .scroll.fs{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ .card.rw .rt th{position:sticky;top:0;z-index:2;background:var(--card);box-shadow:inset 0 -1px 0 var(--line)}
+ /* Laporan: judul kartu + judul kolom menempel di atas, kartu terangkat setelah baris terakhir */
+ .card.lp{flex:none;height:auto}
+ .card.lp .fs{flex:none;overflow:visible}
+ .card.lp>h2.ch{position:sticky;top:var(--hh,52px);z-index:3;box-sizing:border-box;height:48px;margin:-14px -14px 0!important;padding:14px 14px 8px;font-size:20px;line-height:26px;background:var(--card);border-radius:inherit}
+ .card.lp .lh{position:sticky;top:calc(var(--hh,52px) + 48px);z-index:2;background:var(--card)}
+}
+</style>
 </head>
 <body>
 <header class="noprint"><h1 style="margin:0;line-height:0"><img id="lg" class="logo" alt="Positif Clothing" title="POS" onclick="go('beranda')"></h1><nav id="nav"></nav><span id="clk" class="clk"></span><span id="sync" class="muted" style="font-size:13px;cursor:pointer" onclick="syncNow()" title="Klik untuk sinkron sekarang"></span><span id="acc"></span></header>
@@ -34,7 +50,7 @@ function salesShell(){$('view').innerHTML='<div class="prod"><div class="ptabs r
 function vRiwayat(){
  const dt=d=>new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}),tm=d=>new Date(d).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
  const its=s=>{const a=s.items.map(i=>esc(i.name)+' x'+i.qty),n=a.length,pc=s.items.reduce((x,i)=>x+i.qty,0);return `<b>${n} item · ${nf(pc)} pcs</b><br>${a.slice(0,2).join(', ')}`+(n>2?`<span hidden>, ${a.slice(2).join(', ')}</span> <button class="lnk" style="display:inline" onclick="const p=this.previousElementSibling;p.hidden=!p.hidden;this.textContent=p.hidden?'+${n-2} item lainnya':'Ringkas'">+${n-2} item lainnya</button>`:'')};
- salesShell();$('pbody').innerHTML=`<div class="card fl"><h2 class="fn" style="margin:0 0 10px">Riwayat penjualan</h2><div class="scroll fs"><table class="rt"><tr><th>No.</th><th>Waktu</th><th>Item</th><th>Bayar</th><th class="r">Total</th><th></th></tr>
+ salesShell();$('pbody').innerHTML=`<div class="card fl rw"><h2 class="fn" style="margin:0 0 10px">Riwayat penjualan</h2><div class="scroll fs"><table class="rt"><tr><th>No.</th><th>Waktu</th><th>Item</th><th>Bayar</th><th class="r">Total</th><th></th></tr>
  ${S.sales.length?S.sales.map(s=>`<tr><td class="mo">${s.id}</td><td>${dt(s.date)}<br><small>${tm(s.date)}</small></td><td class="it">${its(s)}</td><td><span class="badge">${s.pay}</span></td><td class="r"><b>${rp(s.total)}</b></td><td><button class="btn sec" onclick="receipt(S.sales.find(x=>x.id==='${s.id}'))">Struk</button></td></tr>`).join(''):'<tr><td colspan="6" class="muted">Belum ada transaksi. Selesaikan penjualan pertama di menu Kasir.</td></tr>'}</table></div></div>`;
 }
 /* ---------- LAPORAN ---------- */
@@ -48,8 +64,8 @@ function vLaporan(){
  <div class="card stat"><span>Transaksi hari ini</span><div class="num">${td.length}</div></div>
  <div class="card stat"><span>Total omzet semua</span><div class="num">${rp(sum(S.sales))}</div></div>
  <div class="card stat"><span>Sisa bayar pesanan custom</span><div class="num ${piutang?'bad':''}">${rp(piutang)}</div></div></div>
- <div class="two"><div class="card fl"><h2 class="fn" style="margin:0 0 8px">Produk terlaris</h2><div class="fs"><div class="lh"><span>#</span><span>Produk</span><span>Terjual</span></div>${top.length?top.map((t,i)=>`<div class="lr"><span class="muted">${i+1}</span><div><div>${esc(t[0])}</div><div class="bar2"><i style="width:${Math.round(t[1]/top[0][1]*100)}%"></i></div></div><b>${t[1]} terjual</b></div>`).join(''):'<p class="muted">Belum ada data penjualan.</p>'}</div></div>
- <div class="card fl"><h2 class="fn" style="margin:0 0 8px">Stok menipis atau habis</h2><div class="fs"><div class="lh" style="grid-template-columns:minmax(0,1fr) auto"><span>Produk</span><span>Sisa stok</span></div>${low.length?low.map(x=>`<div class="lr" style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(cn(x.p,x.v))}</span><span class="badge ${x.v.stock<1?'bad':'mid'}">${nf(x.v.stock)}</span></div>`).join(''):'<p class="muted">Semua stok aman.</p>'}</div></div></div>
+ <div class="two"><div class="card fl lp"><h2 class="fn ch" style="margin:0 0 8px">Produk terlaris</h2><div class="fs"><div class="lh"><span>#</span><span>Produk</span><span>Terjual</span></div>${top.length?top.map((t,i)=>`<div class="lr"><span class="muted">${i+1}</span><div><div>${esc(t[0])}</div><div class="bar2"><i style="width:${Math.round(t[1]/top[0][1]*100)}%"></i></div></div><b>${t[1]} terjual</b></div>`).join(''):'<p class="muted">Belum ada data penjualan.</p>'}</div></div>
+ <div class="card fl lp"><h2 class="fn ch" style="margin:0 0 8px">Stok menipis atau habis</h2><div class="fs"><div class="lh" style="grid-template-columns:minmax(0,1fr) auto"><span>Produk</span><span>Sisa stok</span></div>${low.length?low.map(x=>`<div class="lr" style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(cn(x.p,x.v))}</span><span class="badge ${x.v.stock<1?'bad':'mid'}">${nf(x.v.stock)}</span></div>`).join(''):'<p class="muted">Semua stok aman.</p>'}</div></div></div>
  `;
 }
 boot();
