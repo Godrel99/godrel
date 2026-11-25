@@ -77,10 +77,10 @@ warehouse:'<path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.2
 scissors:'<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
 sparkles:'<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',
 history:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
-sliders:'<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+sliders:'<path stroke="currentColor" d="M20 7h-9"/><path stroke="currentColor" d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
 plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',minus:'<path d="M5 12h14"/>',equal:'<path d="M5 9h14"/><path d="M5 15h14"/>',
 refresh:'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
-barcode:'<path d="M4 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M16 5v14"/><path d="M20 5v14"/>',
+barcode:'<path fill="currentColor" stroke="none" d="M3 4h2v16H3zM6 4h1v16H6zM8 4h3v16H8zM12 4h1v16h-1zM14 4h2v16h-2zM17 4h1v16h-1zM19 4h2v16h-2z"/>',
 expand:'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'};
 const IC=n=>'<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">'+(ICO[n]||'')+'</svg>';
 const NI={beranda:'home',kasir:'receipt',produk:'box',stok:'box',bahan:'layers',produksi:'factory',pesanan:'clipboard',rekap:'rekap',kinerja:'users'};
@@ -182,12 +182,16 @@ let ZL=[],ZI=0,CS='m';try{CS=localStorage.getItem('positif_cs')||'m'}catch(e){}i
 const zb=(p,v)=>`<span class="zm" role="button" tabindex="0" aria-label="Perbesar foto" onclick="event.stopPropagation();zoomP(${p},${v})"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></svg></span>`;
 function zoomP(p,v){ZL=allV().filter(x=>x.v.img).map(x=>({v:x.v.id}));ZI=Math.max(0,ZL.findIndex(a=>a.v===v));zShow();$('zm').classList.add('on')}
 function zShow(){const a=ZL[ZI],x=a&&findV(a.v);if(!x){zClose();return}
- $('zmc').innerHTML=`<div class="zi"><img class="z2" src="${x.v.img}" alt="${esc(cn(x.p,x.v))}" draggable="false"></div><div class="row"><div><b style="font-size:18px">${esc(x.p.name)}</b><div class="muted">${esc(vl(x.v))} · ${isJ(x.v)?'jasa':'stok '+nf(x.v.stock)} · <b>${rp(vp(x.p,x.v))}</b></div></div>${tab==='kasir'?`<button class="btn" id="zadd" ${x.v.stock<1?'disabled':''} onclick="zAdd(${x.v.id})">Tambah ke keranjang</button>`:''}</div><div class="row"><button class="btn sec" onclick="zNav(-1)">&lsaquo; Sebelumnya</button><span class="muted">${ZI+1} / ${ZL.length}</span><button class="btn sec" onclick="zNav(1)">Berikutnya &rsaquo;</button><button class="btn sec" onclick="zClose()">Tutup</button></div>`;zPan()}
+ $('zmc').innerHTML=`<div class="zi"><img src="${x.v.img}" alt="${esc(cn(x.p,x.v))}" draggable="false"></div><div class="row"><div><b style="font-size:18px">${esc(x.p.name)}</b><div class="muted">${esc(vl(x.v))} · ${isJ(x.v)?'jasa':'stok '+nf(x.v.stock)} · <b>${rp(vp(x.p,x.v))}</b></div></div>${tab==='kasir'?`<button class="btn" id="zadd" ${x.v.stock<1?'disabled':''} onclick="zAdd(${x.v.id})">Tambah ke keranjang</button>`:''}</div><div class="row"><button class="btn sec" onclick="zNav(-1)">&lsaquo; Sebelumnya</button><span class="muted">${ZI+1} / ${ZL.length}</span><button class="btn sec" onclick="zNav(1)">Berikutnya &rsaquo;</button><button class="btn sec" onclick="zClose()">Tutup</button></div>`;zPan()}
 function zPan(){const c=document.querySelector('.zi'),im=c&&c.firstElementChild;if(!im)return;let sx,sy,sl,st,mv=0,dn=0;
  im.onpointerdown=e=>{if(e.pointerType==='touch'||!im.classList.contains('z2'))return;dn=1;mv=0;sx=e.clientX;sy=e.clientY;sl=c.scrollLeft;st=c.scrollTop;im.setPointerCapture(e.pointerId);c.classList.add('dr');e.preventDefault()};
  im.onpointermove=e=>{if(!dn)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>4)mv=1;c.scrollLeft=sl-dx;c.scrollTop=st-dy};
  im.onpointerup=im.onpointercancel=()=>{dn=0;c.classList.remove('dr')};
- im.onclick=()=>{if(mv){mv=0;return}im.classList.toggle('z2');c.scrollLeft=c.scrollTop=0}}
+ im.onclick=()=>{if(mv){mv=0;return}
+ if(!im.classList.contains('z2'))c.style.height=c.clientHeight+'px'; /* kunci tinggi bingkai: popup tetap seukuran semula */
+ im.classList.toggle('z2');
+ if(im.classList.contains('z2')){c.scrollLeft=(c.scrollWidth-c.clientWidth)/2;c.scrollTop=(c.scrollHeight-c.clientHeight)/2} /* zoom tepat di tengah foto */
+ else{c.style.height='';c.scrollLeft=c.scrollTop=0}}}
 function zAdd(id){if(typeof addV!=='function')return;addV(id);const c=cart.find(c=>c.id===id);$('zadd').textContent='Tambah lagi · di keranjang '+(c?c.qty:0)}
 function zNav(d){ZI=(ZI+d+ZL.length)%ZL.length;zShow()}
 function zClose(){$('zm').classList.remove('on')}
