@@ -108,6 +108,34 @@ td .sch{font-size:12px;padding:1px 8px}
  .kdots button.on::before{height:18px;border-radius:3px;opacity:1}
  .kdots button:active::before{opacity:1}
 }
+/* ===== HP: kartu tahap lega (tinggi mengikuti isi, tanpa snap & tanpa scroll di dalam kartu). Desktop tidak tersentuh ===== */
+@media(max-width:760px){
+ html:has(#pbody .sbs.kb){scroll-snap-type:none!important}
+ #view:has(#pbody .sbs.kb){padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+ #pbody .sk2{position:static!important}
+ .kdots{display:none!important}
+ #pbody .sbs.kb{gap:16px!important}
+ #pbody .sbs.kb>.sb[data-st]{height:auto!important;min-height:0;overflow:visible;scroll-snap-align:none;scroll-snap-stop:normal;padding:18px 16px 10px;gap:0;border-radius:20px;border-color:color-mix(in srgb,var(--sc) 38%,transparent)!important;background:linear-gradient(180deg,color-mix(in srgb,var(--sc) 8%,transparent),transparent 140px),var(--card)!important;box-shadow:none!important}
+ #pbody .sbs.kb>.sb[data-st].cur{border-color:var(--sc)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--sc) 35%,transparent)!important}
+ /* kepala kartu: judul satu baris, meta satu baris, pemisah tipis ke isi */
+ #pbody .sbs.kb .sbh{display:flex;align-items:center;gap:12px;padding:0 0 14px;margin:0 0 2px;border-bottom:1px solid color-mix(in srgb,var(--sc) 22%,transparent)}
+ #pbody .sbs.kb .sbi{width:40px;height:40px;flex:none;border-radius:12px}
+ #pbody .sbs.kb .sbt{display:block;flex:1;min-width:0}
+ #pbody .sbs.kb .sbt b{display:block;font-size:22px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ #pbody .sbs.kb .sbt small{display:inline;font-size:13px;line-height:1.5}
+ #pbody .sbs.kb .sbt .pjn::before{content:" \00b7  "}
+ #pbody .sbs.kb .sbp{width:40px;height:40px;flex:none;background:transparent;border-color:transparent;box-shadow:none;color:var(--muted)}
+ /* isi kartu */
+ #pbody .sbs.kb .sbl{flex:none;min-height:0;overflow:visible;padding:0;gap:0}
+ #pbody .sbs.kb .vg{padding:18px 0 6px}
+ #pbody .sbs.kb .vg+.vg{border-top:1px solid color-mix(in srgb,currentColor 9%,transparent)}
+ #pbody .sbs.kb .vgn{background:transparent;border:0;border-radius:0;padding:0 8px;margin:0 0 6px;font-size:16px;font-weight:600;line-height:1.3}
+ #pbody .sbs.kb .vr{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;width:100%;min-height:50px;padding:10px 8px;gap:4px 12px;border-radius:12px;text-align:left}
+ #pbody .sbs.kb .vr .vs{font-size:15px}
+ #pbody .sbs.kb .vr .vq{font-size:17px;font-weight:600}
+ #pbody .sbs.kb .vr .vx{margin-top:0;font-size:12.5px}
+ #pbody .sbs.kb .sbe{padding:20px 8px}
+}
 @media(prefers-reduced-motion:reduce){.kdots,.kdots.hide,.kdots i{transition:none}}
 /* popup proses */
 #pp{z-index:25}#pp .card.ppc{width:min(420px,100%);max-height:92vh;max-height:92dvh;padding:14px 16px}
@@ -276,7 +304,7 @@ const wdot=w=>w.lv?'<i class="wd w'+w.lv+'" title="'+esc(w.why)+'"></i>':'';
 const wbadge=w=>w.lv?'<span class="wb w'+w.lv+'">'+(w.lv===2?'&#9888; ':'')+esc(w.why)+'</span>':'';
 function pfs(v){pq=v;flowView();const i=$('pq');if(i){i.focus();i.setSelectionRange(v.length,v.length)}}
 const splitN=n=>{const m=String(n).match(/^(.*\S)\s*\(([^()]*)\)\s*$/);return m?{b:m[1],s:m[2]}:{b:String(n),s:''}};
-function flowView(){const q=pq.trim().toLowerCase(),all=groups().filter(g=>!q||g.name.toLowerCase().includes(q)),gl=GL(),multi=gl.length>1&&pg==='Semua',W={};all.forEach(g=>W[g.k]=warn(g));
+function flowView(){const q=pq.trim().toLowerCase(),A0=groups(),all=A0.filter(g=>!q||g.name.toLowerCase().includes(q)),gl=GL(),multi=gl.length>1&&pg==='Semua'&&new Set(A0.map(g=>g.loc)).size>1,W={};all.forEach(g=>W[g.k]=warn(g));
  const n2=all.filter(g=>W[g.k].lv===2).length,n1=all.filter(g=>W[g.k].lv===1).length;
  const box=(s,ix)=>{const L=all.filter(g=>g.st===s),tot=L.reduce((a,g)=>a+g.qty,0),by={},nw=L.filter(g=>W[g.k].lv===2).length;
   L.forEach(g=>{const n=splitN(g.name);(by[n.b]=by[n.b]||[]).push({g,s:n.s})});
@@ -295,7 +323,7 @@ function kdAlt(){const s=document.querySelector('#pbody .sk2');if(!s)return 0;co
 function kdPos(){const a=kdAlt();if(a)document.documentElement.style.setProperty('--alt',a+'px')}
 function kdUpd(){kdR=0;const d=document.querySelector('.kdots');if(!d)return;const cs=[...document.querySelectorAll('#pbody .sbs.kb>.sb')],a=kdAlt();let b=0,m=1e9;cs.forEach((c,i)=>{const x=Math.abs(c.getBoundingClientRect().top-a);if(x<m){m=x;b=i}});[...d.children].forEach((e,i)=>{e.classList.toggle('on',i===b);if(i===b)e.setAttribute('aria-current','true');else e.removeAttribute('aria-current')});if(cs[b])d.style.setProperty('--sc',getComputedStyle(cs[b]).getPropertyValue('--sc'))}
 let kdAn=false,kdTouch=false,kdS=0,kdG=null;
-const kdOK=()=>matchMedia('(max-width:760px)').matches&&document.querySelector('#pbody .sbs.kb')&&!document.querySelector('.modal.on');
+const kdOK=()=>false; /* snap satu-kartu-per-layar dimatikan di HP: kartu kini setinggi isinya & scroll halaman biasa */
 const kdCards=()=>[...document.querySelectorAll('#pbody .sbs.kb>.sb')];
 const kdY=c=>Math.round(c.getBoundingClientRect().top+scrollY-kdAlt());
 function kdCur(){const a=kdAlt();let b=0,m=1e9;kdCards().forEach((c,i)=>{const x=Math.abs(c.getBoundingClientRect().top-a);if(x<m){m=x;b=i}});return b}
