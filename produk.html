@@ -80,6 +80,28 @@
  .ub4{display:none}
  .mo4{grid-area:m;display:inline-grid;place-items:center;width:44px;height:44px;border-radius:10px;border:0;background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text);cursor:pointer;padding:0}
 }
+/* ===== HP: Stok lebih lega (tampilan desktop tidak tersentuh) ===== */
+@media(max-width:860px){
+ /* header (judul, cari, filter) dan sub-header tidak menempel lagi: layar dipakai untuk isi */
+ #pbody .sk2{position:static!important}
+ .sk4h{position:static;background:transparent;border-bottom:0;box-shadow:none;padding:4px 0 0;margin-bottom:12px}
+ .lg4{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:14px;margin:4px 0 2px}
+ .lg4::-webkit-scrollbar{display:none}.lg4 span{flex:none}
+ /* kartu produk: bingkai tipis, sudut bulat, ruang dalam lebih besar */
+ .sk4b{gap:16px}
+ .pk4{border:1px solid color-mix(in srgb,var(--acc,#d4ff3f) 40%,transparent);border-radius:20px;padding:16px 14px 8px}
+ .ph4{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 12px;padding:0 4px 14px;margin-bottom:4px}
+ .ph4 h3{grid-column:1;grid-row:1;font-size:22px;line-height:1.15}
+ .ph4 .lnk3{grid-column:2;grid-row:1}
+ .ph4>small{grid-column:1/-1;grid-row:2;font-size:13px}
+ .ph4 .sm4{grid-column:1/-1;grid-row:3;margin:2px 0 0;width:auto;font-size:13px;gap:4px 8px}
+ /* baris varian: lebih tinggi, ukuran & jumlah lebih jelas */
+ .vr4{grid-template-columns:84px minmax(0,1fr) auto;gap:6px 12px;padding:12px 4px;min-height:64px;border-radius:12px}
+ .vr4+.vr4{border-top:1px solid color-mix(in srgb,var(--line) 45%,transparent)}
+ .vw4 b{font-size:16px}.vw4 span{font-size:13px}
+ .s4 b{font-size:19px}
+ .pr4{font-size:12.5px;gap:4px 10px}
+}
 </style>
 </head>
 <body>
