@@ -242,7 +242,7 @@ function nbUpd(){nbR=0;let b=document.querySelector('.nbar');const cs=[...docume
  if(!cs.length||!matchMedia('(max-width:860px)').matches||document.querySelector('.modal.on,#sdm')){if(b)b.classList.remove('on');return}
  if(!b){b=document.createElement('div');b.className='nbar';b.setAttribute('aria-hidden','true');document.body.appendChild(b)}
  const T=Math.round(nbTop());let a=null;
- cs.forEach(c=>{const r=c.getBoundingClientRect(),h=c.querySelector('.ph4');if(r.top<=T&&r.bottom>T+nbH&&h&&h.getBoundingClientRect().bottom<=T+2)a=c});
+ cs.forEach(c=>{const r=c.getBoundingClientRect(),h=c.querySelector('.ph4 h3');if(r.top<=T&&r.bottom>T+nbH&&h&&h.getBoundingClientRect().bottom<=T+1)a=c});
  if(!a){b.classList.remove('on');return}
  const t=a.querySelector('.ph4 h3');b.textContent=t?t.textContent:'';b.style.top=T+'px';b.classList.add('on')}
 function nbInit(){if(!nbOn){nbOn=true;const q=()=>{if(!nbR)nbR=requestAnimationFrame(nbUpd)};addEventListener('scroll',q,{passive:true});addEventListener('resize',q);addEventListener('click',()=>setTimeout(q,60),true)}nbUpd()}
