@@ -342,6 +342,8 @@ nav button.on{background:var(--acc);color:var(--acc-t);box-shadow:0 0 24px -6px 
 @media(max-width:760px){
  /* menu bawah HP: bar minimalis menempel di bawah layar, ikon outline, aktif = filled */
  #view .prod>.ptabs.rl{position:fixed!important;left:0;right:0;top:auto!important;bottom:0;z-index:15;margin:0;flex-direction:row;justify-content:space-around;gap:0;overflow-x:auto;scrollbar-width:none;padding:0 0 env(safe-area-inset-bottom,0px);border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;background:var(--card);-webkit-backdrop-filter:none;backdrop-filter:none}
+ html,body{overscroll-behavior-y:none}
+ #view .prod>.ptabs.rl{transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);will-change:transform;contain:layout paint}
  #view .prod>.ptabs.rl::-webkit-scrollbar{display:none}
  #view .prod>.ptabs.rl button{flex:1 0 auto;width:auto;min-width:56px;height:56px;padding:0 4px;gap:3px;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--muted);font:500 11px/1 Barlow,sans-serif}
  #view .prod>.ptabs.rl button:hover{border:0;color:var(--muted)}
