@@ -18,7 +18,8 @@
  /* Riwayat: kartu seukuran layar, judul kolom tetap, hanya baris data yang bergulir */
  html:has(#pbody .rw){overflow:auto}
  #view.fit:has(#pbody .rw),#view.fit:has(#pbody .lp){height:auto;overflow:visible;display:block}
- .card.rw{flex:none;height:calc(100dvh - var(--hh,52px) - 124px - env(safe-area-inset-top,0px) - 2*env(safe-area-inset-bottom,0px));min-height:280px}
+ #view:has(#pbody .rw){padding-bottom:0!important}
+ .card.rw{flex:none;height:calc(100dvh - var(--ctop,170px) - 64px - env(safe-area-inset-bottom,0px));min-height:280px}
  .card.rw .scroll.fs{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
  .card.rw .rt th{position:sticky;top:0;z-index:2;background:var(--card);box-shadow:inset 0 -1px 0 var(--line)}
  /* Laporan: judul kartu + judul kolom menempel di atas, kartu terangkat setelah baris terakhir */
@@ -51,8 +52,10 @@ function vRiwayat(){
  const dt=d=>new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}),tm=d=>new Date(d).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
  const its=s=>{const a=s.items.map(i=>esc(i.name)+' x'+i.qty),n=a.length,pc=s.items.reduce((x,i)=>x+i.qty,0);return `<b>${n} item · ${nf(pc)} pcs</b><br>${a.slice(0,2).join(', ')}`+(n>2?`<span hidden>, ${a.slice(2).join(', ')}</span> <button class="lnk" style="display:inline" onclick="const p=this.previousElementSibling;p.hidden=!p.hidden;this.textContent=p.hidden?'+${n-2} item lainnya':'Ringkas'">+${n-2} item lainnya</button>`:'')};
  salesShell();$('pbody').innerHTML=`<div class="card fl rw"><h2 class="fn" style="margin:0 0 10px">Riwayat penjualan</h2><div class="scroll fs"><table class="rt"><tr><th>No.</th><th>Waktu</th><th>Item</th><th>Bayar</th><th class="r">Total</th><th></th></tr>
- ${S.sales.length?S.sales.map(s=>`<tr><td class="mo">${s.id}</td><td>${dt(s.date)}<br><small>${tm(s.date)}</small></td><td class="it">${its(s)}</td><td><span class="badge">${s.pay}</span></td><td class="r"><b>${rp(s.total)}</b></td><td><button class="btn sec" onclick="receipt(S.sales.find(x=>x.id==='${s.id}'))">Struk</button></td></tr>`).join(''):'<tr><td colspan="6" class="muted">Belum ada transaksi. Selesaikan penjualan pertama di menu Kasir.</td></tr>'}</table></div></div>`;
+ ${S.sales.length?S.sales.map(s=>`<tr><td class="mo">${s.id}</td><td>${dt(s.date)}<br><small>${tm(s.date)}</small></td><td class="it">${its(s)}</td><td><span class="badge">${s.pay}</span></td><td class="r"><b>${rp(s.total)}</b></td><td><button class="btn sec" onclick="receipt(S.sales.find(x=>x.id==='${s.id}'))">Struk</button></td></tr>`).join(''):'<tr><td colspan="6" class="muted">Belum ada transaksi. Selesaikan penjualan pertama di menu Kasir.</td></tr>'}</table></div></div>`;rwFit()
 }
+/* tinggi kartu Riwayat di HP: dari posisi atas kartu sampai tepat di atas bar bawah */
+function rwFit(){const m=()=>{const c=document.querySelector('.card.rw');if(!c)return;if(!matchMedia('(max-width:760px)').matches){c.style.removeProperty('--ctop');return}c.style.setProperty('--ctop',Math.round(c.getBoundingClientRect().top+scrollY)+'px')};m();requestAnimationFrame(m);setTimeout(m,300);setTimeout(m,1200);if(!window._rwf){window._rwf=1;addEventListener('resize',m);addEventListener('orientationchange',()=>setTimeout(m,200))}}
 /* ---------- LAPORAN ---------- */
 function vLaporan(){
  const td=S.sales.filter(s=>today(s.date)),sum=a=>a.reduce((x,s)=>x+s.total,0);
