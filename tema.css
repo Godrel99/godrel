@@ -560,3 +560,19 @@ header .clk+#sync{margin-left:14px}
 .bhl{max-height:50vh;overflow:auto;display:flex;flex-direction:column;gap:4px;text-align:left}
 .bhc{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:10px;border:1px solid var(--line);cursor:pointer}
 .bhc input{width:18px;height:18px;accent-color:var(--acc)}.bhc span{display:flex;flex-direction:column}.bhc small{color:var(--muted);font-size:12px}
+
+/* ---------- mode Detail di Kasir (seperti Windows Explorer) ---------- */
+[data-cs=d] #grid{display:flex;flex-direction:column;gap:0}
+[data-cs=d] #grid .kd-h,[data-cs=d] #grid .kd{display:grid;grid-template-columns:44px minmax(0,1fr) 110px 110px 150px;column-gap:12px;align-items:center}
+.kd-h{padding:7px 12px;color:var(--muted);font:600 13px Barlow,sans-serif;border-bottom:1px solid var(--line)}
+.kd-h .r{text-align:right}
+[data-cs=d] #grid .p.kd{min-height:0;padding:5px 12px;row-gap:0;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0;box-shadow:none!important}
+[data-cs=d] #grid .p.kd:hover:not(:disabled){background:color-mix(in srgb,var(--text) 8%,transparent)}
+.kd-th{position:relative;display:block;width:36px;height:36px;border-radius:4px;background:var(--bg)}
+[data-cs=d] #grid .kd .kd-th img{width:36px;height:36px;border-radius:4px}
+.kd-th .zm{top:auto;right:-5px;bottom:-5px;width:18px;height:18px}.kd-th .zm svg{width:11px;height:11px}
+.kd b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kd .kd-v,.kd .kd-s{color:var(--muted);font-size:14px;white-space:nowrap}
+[data-cs=d] #grid .kd .num{font-size:20px;margin-top:0;text-align:right;white-space:nowrap}
+@media screen and (min-width:861px){[data-cs=d] #grid .kd-h{position:sticky;top:0;z-index:2;background:var(--bg)}}
+@media(max-width:600px){[data-cs=d] #grid .kd-h,[data-cs=d] #grid .kd{grid-template-columns:36px minmax(0,1fr) 56px 104px;column-gap:8px}[data-cs=d] #grid .kd .num{font-size:16px}.kd .kd-s{font-size:13px}.kd-h span:nth-child(3),.kd .kd-v{display:none}}

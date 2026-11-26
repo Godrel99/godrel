@@ -96,7 +96,8 @@ function grid(){
  const ql=q.toLowerCase();
  if(cat===HID&&!q.trim()){$('grid').innerHTML='<p class="muted">Produk disembunyikan. Pilih kategori di kanan atas, atau ketik nama produk / scan barcode.</p>';return}
  const l=S.products.filter(p=>p.variants.length&&(cat===HID||cat==='Semua'||p.cat===cat)&&(p.name.toLowerCase().includes(ql)||p.variants.some(v=>vl(v).toLowerCase().includes(ql)||bcv(v).includes(q))));
- $('grid').innerHTML=l.length?l.map(p=>{const im=(p.variants.find(v=>v.img)||{}).img,iv=(p.variants.find(v=>v.img)||{}).id,st=p.variants.reduce((a,v)=>a+v.stock,0),n=p.variants.length,pr=p.variants.map(v=>vp(p,v)),lo=Math.min(...pr);
+ const dm=CS==='d';$('grid').innerHTML=l.length?(dm?'<div class="kd-h" aria-hidden="true"><span></span><span>Nama</span><span>Varian</span><span>Stok</span><span class="r">Harga</span></div>':'')+l.map(p=>{const im=(p.variants.find(v=>v.img)||{}).img,iv=(p.variants.find(v=>v.img)||{}).id,st=p.variants.reduce((a,v)=>a+v.stock,0),n=p.variants.length,pr=p.variants.map(v=>vp(p,v)),lo=Math.min(...pr);
+ if(dm)return `<button class="p kd" ${st<1?'disabled':''} onclick="pick(${p.id})"><span class="kd-th">${im?`<img src="${im}" alt="">`+zb(p.id,iv):''}</span><b>${esc(p.name)}</b><span class="kd-v">${n} varian</span><span class="kd-s">${st>=9999?'jasa':'stok '+st}</span><span class="num">${Math.max(...pr)!==lo?'mulai ':''}${rp(lo)}</span></button>`;
  return `<button class="p" ${st<1?'disabled':''} onclick="pick(${p.id})">${im?`<img src="${im}" alt="">`+zb(p.id,iv):''}<b>${esc(p.name)}</b><small>${n>1?n+' varian, ':''}${st>=9999?'jasa':'stok '+st}</small><span class="num">${Math.max(...pr)!==lo?'mulai ':''}${rp(lo)}</span></button>`}).join(''):'<p class="muted">Produk tidak ditemukan. Tambahkan di menu Produk.</p>';
 }
 function beep(ok){try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=ok?880:220;g.gain.value=.08;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.12)}catch(e){}}
@@ -171,8 +172,8 @@ function checkout(){
  cart.forEach(c=>{const x=findV(c.id);if(x&&!isJ(x.v)){logS(x,'Penjualan',x.v.stock,x.v.stock-c.qty,s.id);x.v.stock-=c.qty}});
  S.sales.unshift(s);save();cart=[];closeSheet();receipt(s);render();
 }
-function setCS(v){CS=v;document.documentElement.dataset.cs=v;try{localStorage.setItem('positif_cs',v)}catch(e){}}
-function csCtl(){if($('cs'))return;const h=`<label class="si" title="Ukuran thumbnail">${IC('thumb')}<select id="cs" onchange="setCS(this.value)" aria-label="Ukuran thumbnail"><option value="l">Large thumbnail</option><option value="m">Medium thumbnail</option><option value="s">Small thumbnail</option></select></label>`;let a=$('cat')||($('pfq')&&$('pfq').nextElementSibling);if(a){a.insertAdjacentHTML('afterend',h);$('cs').value=CS}}
+function setCS(v){CS=v;document.documentElement.dataset.cs=v;try{localStorage.setItem('positif_cs',v)}catch(e){}if($('grid'))grid()}
+function csCtl(){if($('cs'))return;const h=`<label class="si" title="Ukuran thumbnail">${IC('thumb')}<select id="cs" onchange="setCS(this.value)" aria-label="Ukuran thumbnail"><option value="l">Large thumbnail</option><option value="m">Medium thumbnail</option><option value="s">Small thumbnail</option><option value="d">Detail</option></select></label>`;let a=$('cat')||($('pfq')&&$('pfq').nextElementSibling);if(a){a.insertAdjacentHTML('afterend',h);$('cs').value=CS}}
 const _r=render;render=function(){_r();csCtl()};
 boot();
 </script></body></html>
