@@ -73,7 +73,9 @@ function rwSave(a){try{localStorage.setItem('rwCols',JSON.stringify(a))}catch(e)
 function rwTbl(){
  const dt=d=>new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}),tm=d=>new Date(d).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
  const pcs=s=>s.items.reduce((x,i)=>x+i.qty,0);
- const its=s=>{const a=s.items.map(i=>`<div class="il">${esc(i.name)} x${i.qty}</div>`),n=a.length;return `<b>${n} item · ${nf(pcs(s))} pcs</b>${a.slice(0,2).join('')}`+(n>2?`<div class="ix" hidden>${a.slice(2).join('')}</div><button class="lnk" style="display:inline-block;margin-top:2px" onclick="const p=this.previousElementSibling;p.hidden=!p.hidden;this.textContent=p.hidden?'+${n-2} item lainnya':'Ringkas'">+${n-2} item lainnya</button>`:'')};
+ const its=s=>{const a=s.items.map(i=>`${esc(i.name)} x${i.qty}`),n=a.length,head=`<b>${n} item · ${nf(pcs(s))} pcs</b>`;
+  if(n<2)return head+`<div class="il">${a[0]||''}</div>`;
+  return head+`<div class="il">${a[0]} <button class="lnk" style="display:inline" onclick="const p=this.closest('td').querySelector('.ix');p.hidden=!p.hidden;this.textContent=p.hidden?'+${n-1} item lainnya':'Ringkas'">+${n-1} item lainnya</button></div><div class="ix" hidden>${a.slice(1).map(x=>`<div class="il">${x}</div>`).join('')}</div>`};
  let L=S.sales.slice();
  if(rwS.k){const f={id:s=>s.id,date:s=>+new Date(s.date),item:pcs,pay:s=>String(s.pay),total:s=>s.total}[rwS.k];
   L.sort((a,b)=>{const x=f(a),y=f(b);return (typeof x==='string'?x.localeCompare(y,'id',{numeric:true}):x-y)*rwS.d})}
