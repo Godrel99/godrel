@@ -89,13 +89,13 @@ expand:'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-
   ".ms{width:1em;height:1em;display:inline-block;flex:none}"+
   ".nv.on .ms,.hub button:active .ms{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}"+
   ".badge .ms{font-size:14px;font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 20}"+
-  ".zm .ms{font-size:18px;color:#fff}"+
+  ".zm .ms{font-size:18px;color:#fff}"+".ms .sw-f{display:none}.on .ms .sw-o,.hub button:active .ms .sw-o{display:none}.on .ms .sw-f,.hub button:active .ms .sw-f{display:inline}"+
   ".ppx .ms,.jh .ms,.ib4 .ms,.lnk .ms,.btn .ms{vertical-align:middle}";
   document.head.appendChild(st)}
 })();
 const MSN={home:'home',receipt:'universal_currency',shirt:'checkroom',box:'box',package:'package_2',sewing:'sewing',monitoring:'monitoring',layout:'auto_awesome_mosaic',layers:'layers',factory:'factory',clipboard:'assignment',grid:'qr_code_scanner',sticker:'sticky_note_2',workflow:'account_tree',printer:'print',check:'check_circle',ban:'cancel',warehouse:'warehouse',scissors:'content_cut',sparkles:'auto_awesome',history:'history',sliders:'tune',plus:'add',minus:'remove',equal:'equal',refresh:'refresh',barcode:'barcode',expand:'open_in_new',rekap:'assignment_turned_in',settings:'settings',shield:'shield',chart:'bar_chart',filter:'filter_alt',users:'group',thumb:'grid_view',trash:'delete',key:'key',logout:'logout',upload:'upload',copy:'content_copy',sheet:'table_chart',x:'close',db:'database',lock:'lock',unlock:'lock_open',tag:'sell',zoom:'zoom_in',warn:'warning',more:'more_horiz',clock:'schedule'};
 /* ikon mesin jahit buatan sendiri (Material tidak punya): gaya Sharp, kanvas 24 */
-const SEWSVG='<svg viewBox="0 0 24 24" aria-hidden="true" style="width:1em;height:1em;display:block;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:miter;stroke-linecap:butt"><path d="M3.7 7.8H19.8V18.7H2.5V16.5H14V11.5H8.7L7.3 13.1H3.7Z"/><path d="M15.8 5.4H17.8M16.8 5.4V7.8M5.6 13.1V15M19.8 9.5H21.8V12.9H19.8"/><circle cx="17" cy="11" r="1.25"/></svg>';
+const SEWSVG='<svg viewBox="0 0 24 24" aria-hidden="true" style="width:1em;height:1em;display:block;stroke-linejoin:miter;stroke-linecap:butt"><g class="sw-o" style="fill:none;stroke:currentColor;stroke-width:1.7"><path d="M3.94 6.57H19.29V20.5H2.8V17.69H13.76V11.3H8.71L7.38 13.34H3.94Z"/><path d="M15.48 3.5H17.39M16.43 3.5V6.57M5.76 13.34V15.77M19.29 8.74H21.2V13.09H19.29"/><circle cx="16.62" cy="10.66" r="1.3"/></g><g class="sw-f" style="fill:currentColor;stroke:currentColor;stroke-width:1.7"><path fill-rule="evenodd" d="M3.94 6.57H19.29V20.5H2.8V17.69H13.76V11.3H8.71L7.38 13.34H3.94ZM14.62 10.66a2 2 0 1 0 4 0a2 2 0 1 0-4 0Z"/><path d="M19.29 8.74H21.2V13.09H19.29Z"/><path fill="none" d="M15.48 3.5H17.39M16.43 3.5V6.57M5.76 13.34V15.77"/></g></svg>';
 const MSG=n=>n==='sewing'?SEWSVG:n;
 const MSX={order:'print',ban:'cancel',pencil:'edit',trash:'delete',printer:'print',scissors:'content_cut',shirt:'checkroom',truck:'local_shipping',sparkles:'auto_awesome',users:'group'};
 const MS=(n,sz)=>'<span class="ms" aria-hidden="true"'+(sz?' style="font-size:'+sz+'px"':'')+'>'+MSG(MSX[n]||n)+'</span>';
