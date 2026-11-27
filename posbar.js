@@ -12,16 +12,16 @@
   /* Ikon = Google Material Symbols (Sharp). Ganti ikon: ubah nama di bawah
      (nama dari fonts.google.com/icons, huruf kecil, spasi jadi garis bawah). */
   var ICO = {
-    receipt: 'shopping_cart',          /* Kasir */
-    chart: 'bar_chart',                /* Penjualan */
-    box: 'inventory_2',                /* Produk */
+    receipt: 'universal_currency',     /* Kasir */
+    chart: 'monitoring',                /* Penjualan */
+    box: 'package_2',                  /* Produk */
     layers: 'layers',                  /* Stok bahan baku */
     factory: 'factory',                /* Produksi */
     clipboard: 'assignment',           /* Pesanan custom */
     rekap: 'assignment_turned_in',     /* Rekap order */
     users: 'group',                    /* Kinerja */
-    grid: 'apps',                      /* Aplikasi lain */
-    sticker: 'sticky_note_2',          /* Layout stiker */
+    grid: 'qr_code_scanner',           /* Aplikasi lain */
+    sticker: 'auto_awesome_mosaic',       /* Layout stiker */
     key: 'key',                        /* Ganti PIN */
     settings: 'settings',              /* Pengaturan */
     logout: 'logout'                   /* Keluar */
